@@ -1,0 +1,160 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Lab 05: JSON Threat Protection</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-lab-05-json-threat"
+                  title="Lab 05: JSON Threat Protection"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>Whenever receiving data from an API client, it is imperative that we protect the API and backend against potential content-based attacks. </p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to verify incoming JSON payload before parsing it</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Your proxy created in the previous lab</li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>You want your API to be consumed by many different clients and you want to protect against bad input.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="SKIP (unless your current proxy is broken)" duration="0">
+        <aside class="warning"><p><strong>Important</strong>: This section should only be used if you were unable to complete the last lab and your proxy is not at a good starting point.</p>
+</aside>
+<p>Download a working solution to the previous lab as a proxy bundle ZIP file:</p>
+
+<p><a href="https://api-eng-labs-snapshot-201910.storage.googleapis.com/retail-v1-lab04.zip" target="_blank"><paper-button class="colored" raised><iron-icon icon="cloud_download"></iron-icon>Download Lab 04 Bundle</paper-button></a></p>
+<p>Prerequisites:</p>
+<ul>
+<li>Target Server: TS-Retail (instructions in lab 2)</li>
+<li>Product, Developer and App (instructions in lab 3)</li>
+</ul>
+
+<p>Find your spec ID. When you open your spec in the spec editor, the link will be in this format, with the spec ID at the end of the URL:</p>
+<pre>https://apigee.com/organizations/YOURORG/specs/folder/FOLDERID/editor/YOURSPECID</pre>
+<p>Navigate to your proxy and upload the bundle as a new revision:</p>
+<p class="image-container"><img style="width: 190.00px" src="https://lh5.googleusercontent.com/U7eHM38KSVuHmVqm58-GOV1BNkyBkzUaa7jYtEm15a0HU8cCU9UTGPyUv1bIbVAvSGxUHhUTF7tn9e_Mnm5ok9tMNmbCCn20vwS5uCXTS7pt_aNl6lZgFqvcC4ADsC7zb_XdV8H-"></p>
+<p><br>Select the association.json resource. Replace YOURORG and YOURSPECID with the values from the spec URL.</p>
+<p class="image-container"><img style="width: 624.00px" src="https://lh5.googleusercontent.com/ctOmzbmP_57QYyXSHNaMm02rgpaDsZx6MV0ov43mq_P0g21JGZL1YRrtjLOA7bYHjga_CYyTTmW3oNfAFhkLS2Si0AGeFwbHFZ4IjIspYzEOffGKB3x8cC1q2n6nhqhpdzTSnzhk"></p>
+<p>Once updated, the association.json should look something like this:</p>
+<pre>{
+        &#34;url&#34;: &#34;/organizations/apigeek-eval/specs/doc/207966/content&#34;
+}</pre>
+<p>Click Save to save your proxy. Open the Deployment menu, and check the deployment status. Click on test to deploy this revision of the proxy.</p>
+<p class="image-container"><img style="width: 610.00px" src="https://lh6.googleusercontent.com/gCwM-0EwiOOuVyFAOT_iedp3lDt0oMYZ0WohqVRZFY2UqXVdbYVErNH7AAAvXHcY2TX9KDwwfNrTkrAoeMMykOlRZAUGsV9oK_oOZbClP-9q8FBWqSZNvlDGWJuxuMAJZxJrABth"></p>
+<p>Test will be green when it is deployed.</p>
+<p class="image-container"><img style="width: 173.00px" src="https://lh5.googleusercontent.com/si6k0W9lOHNqymFdUCNBb3ljb3GF4F41StR3Cm7g3e9b5J1Zsi56WHgQQB3bGctAsCJWYVFKCxrPf57OAwpi8-zf3FRc6hGpo8yDNjsSaNYAwp6eOATSBCknxi-DeYbtctEZzqQV"></p>
+
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Apply the JSON Threat Protection policy</li>
+<li>Adjust the policy for the required payload to work</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Apply the JSON Threat Protection policy" duration="5">
+        <p>In order to prevent bad JSON payloads from getting all the way to the backend, we&#39;ll be inspecting it for proper syntax and structure before moving forward.</p>
+<p>For that, we&#39;ll be adding a JSON Threat Protection policy in the createOrder flow. The JSON Threat Protection policy will check a JSON payload against limits without loading the payload into a JSON parser.</p>
+<p>Open your proxy. Select the createOrder flow, then click on the ‘+ Step&#39; on the request side of the flow:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3d3a4fe5819578f0.png"></p>
+<p>In the ‘Add Step&#39; pop up, select the JSON Threat Protection policy. Change the display name to:</p>
+<pre>JTP-Protect</pre>
+<p>And click on Add:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5a7da9db5533d4cc.png"></p>
+<p>When you inspect the policy&#39;s configuration, make sure the following initial values are used:</p>
+<pre><code>&lt;JSONThreatProtection async=&#34;false&#34; continueOnError=&#34;false&#34; enabled=&#34;true&#34; name=&#34;JTP-Protect&#34;&gt;
+    &lt;ArrayElementCount&gt;3&lt;/ArrayElementCount&gt;
+    &lt;ContainerDepth&gt;2&lt;/ContainerDepth&gt;
+    &lt;ObjectEntryCount&gt;5&lt;/ObjectEntryCount&gt;
+    &lt;ObjectEntryNameLength&gt;10&lt;/ObjectEntryNameLength&gt;
+    &lt;Source&gt;request&lt;/Source&gt;
+    &lt;StringValueLength&gt;100&lt;/StringValueLength&gt;
+&lt;/JSONThreatProtection&gt;</code></pre>
+<p>To understand what each of the parameters limits, see the <a href="https://docs.apigee.com/api-platform/reference/policies/json-threat-protection-policy" target="_blank">JSONThreatProtection documentation</a>.</p>
+<p>Save and deploy your proxy and test it with the following request:</p>
+<p>URL:</p>
+<pre><code>POST /orders</code></pre>
+<p>Headers:</p>
+<pre><code>apikey: {key of application}
+Content-Type: application/json</code></pre>
+<p>Body:</p>
+<pre><code>{
+    &#34;orderNumber&#34;: 342345,
+    &#34;lineItems&#34;: [
+        { &#34;productId&#34;: &#34;ME089LLA&#34;, &#34;quantity&#34;: 1 },
+        { &#34;productId&#34;: &#34;MD388LLA&#34;, &#34;quantity&#34;: 2 }
+    ],
+    &#34;promisedDeliveryDate&#34;: &#34;30 Oct 2019&#34;,
+    &#34;deliveryNotes&#34;: &#34;If not home, please place inside backyard gate&#34;,
+    &#34;destination&#34;: {
+        &#34;addressType&#34;: &#34;home&#34;,
+        &#34;address&#34;: {
+            &#34;streetAddr1&#34;: &#34;1 Main St.&#34;
+        }
+    }
+}</code></pre>
+<p>Example:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9dbbe548f5fc8e53.png"></p>
+<p class="image-container"><img style="width: 535.00px" src="img/890fdc2639adfcb6.png"></p>
+<p>You should get a 500 status code with the JSON Threat Protection message as payload:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1674db78c580652d.png"></p>
+<p>If you don&#39;t get a 500 status code, make sure you are passing in the Content-Type header with a value of application/json. If the Content-Type header doesn&#39;t exist, the JSON Threat Protection policy will assume the payload is not JSON and will therefore not perform its checks.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adjust the policy for the required payload to work" duration="5">
+        <p>Look for clues in the response and adjust the policy values in order to allow for our test payload to pass. After increasing the limit for the object entry name length, you&#39;ll get a different error. Keep increasing limits for each failure until the request passes.</p>
+<p>You should then expect something like:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/fff4780ac8f54250.png"></p>
+<p>In practice, you don&#39;t need to make the limits so close to the expected values -- you don&#39;t want legitimate requests to be rejected. Also, when you significantly change your API, make sure to validate your limits against your new design. Items like </p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You have successfully protected the createOrder resource against JSON threats.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

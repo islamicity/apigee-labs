@@ -1,0 +1,346 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Lab 13: Developer Portal</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-lab-13-portal"
+                  title="Lab 13: Developer Portal"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>Apigee offers the ability for developers to learn about your API via the documentation in the developer portal in a way that the API can actually be executed from the documentation. This simplifies the learning process for any developers wanting to adopt your API.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>CORS headers</li>
+<li>How to publish APIs as products on a portal</li>
+<li>How to prepare an API to be executed from within the documentation</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Your proxy created in the previous lab</li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>You want developers to easily find out about your APIs and how to use them..</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="SKIP (unless your current proxy is broken)" duration="0">
+        <aside class="warning"><p><strong>Important</strong>: This section should only be used if you were unable to complete the last lab and your proxy is not at a good starting point.</p>
+</aside>
+<p>Download a working solution to the previous lab as a proxy bundle ZIP file:</p>
+
+<p><a href="https://api-eng-labs-snapshot-201910.storage.googleapis.com/retail-v1-lab12.zip" target="_blank"><paper-button class="colored" raised><iron-icon icon="cloud_download"></iron-icon>Download Lab 12 Bundle</paper-button></a></p>
+<p>Prerequisites:</p>
+<ul>
+<li>Target Server: TS-Retail (instructions in lab 2)</li>
+<li>Product, Developer and App (instructions in lab 3)</li>
+<li>Key Value Map: ProductsKVM (instructions in lab 6)</li>
+<li>Shared Flow: BackendCredentials (instructions in lab 9)</li>
+<li>Cache: ProductsCache (instructions in lab 12)</li>
+</ul>
+
+<p>Find your spec ID. When you open your spec in the spec editor, the link will be in this format, with the spec ID at the end of the URL:</p>
+<pre>https://apigee.com/organizations/YOURORG/specs/folder/FOLDERID/editor/YOURSPECID</pre>
+<p>Navigate to your proxy and upload the bundle as a new revision:</p>
+<p class="image-container"><img style="width: 190.00px" src="https://lh5.googleusercontent.com/U7eHM38KSVuHmVqm58-GOV1BNkyBkzUaa7jYtEm15a0HU8cCU9UTGPyUv1bIbVAvSGxUHhUTF7tn9e_Mnm5ok9tMNmbCCn20vwS5uCXTS7pt_aNl6lZgFqvcC4ADsC7zb_XdV8H-"></p>
+<p><br>Select the association.json resource. Replace YOURORG and YOURSPECID with the values from the spec URL.</p>
+<p class="image-container"><img style="width: 624.00px" src="https://lh5.googleusercontent.com/ctOmzbmP_57QYyXSHNaMm02rgpaDsZx6MV0ov43mq_P0g21JGZL1YRrtjLOA7bYHjga_CYyTTmW3oNfAFhkLS2Si0AGeFwbHFZ4IjIspYzEOffGKB3x8cC1q2n6nhqhpdzTSnzhk"></p>
+<p>Once updated, the association.json should look something like this:</p>
+<pre>{
+        &#34;url&#34;: &#34;/organizations/apigeek-eval/specs/doc/207966/content&#34;
+}</pre>
+<p>Click Save to save your proxy. Open the Deployment menu, and check the deployment status. Click on test to deploy this revision of the proxy.</p>
+<p class="image-container"><img style="width: 610.00px" src="https://lh6.googleusercontent.com/gCwM-0EwiOOuVyFAOT_iedp3lDt0oMYZ0WohqVRZFY2UqXVdbYVErNH7AAAvXHcY2TX9KDwwfNrTkrAoeMMykOlRZAUGsV9oK_oOZbClP-9q8FBWqSZNvlDGWJuxuMAJZxJrABth"></p>
+<p>Test will be green when it is deployed.</p>
+<p class="image-container"><img style="width: 173.00px" src="https://lh5.googleusercontent.com/si6k0W9lOHNqymFdUCNBb3ljb3GF4F41StR3Cm7g3e9b5J1Zsi56WHgQQB3bGctAsCJWYVFKCxrPf57OAwpi8-zf3FRc6hGpo8yDNjsSaNYAwp6eOATSBCknxi-DeYbtctEZzqQV"></p>
+
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Add CORS headers to the existing API</li>
+<li>Create a new Developer Portal</li>
+<li>Publish the API to the portal</li>
+<li>Invoke the API from the documentation</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add CORS headers to the existing API" duration="5">
+        <p>CORS (cross-origin resource sharing) are headers placed in the API response that will tell a client (a browser in this case) whether they should load the response or not, when that data is coming from a different origin or domain. For example, an application running on a browser on app.example.com, will not be able to run an API on domains like app2.example.com or app.example.net, unless the response from the API authorizes the browser to display the data.</p>
+<p>CORS headers are necessary in our lab because our API runs under a *.apigee.net domain, while the portal is on *.apigee.io, and, the UI in *.apigee.com.</p>
+<p>In order to properly invoke the API from the documentation, in all possible scenarios, we&#39;ll need to add CORS headers to all of our API responses, for the positive scenarios (response flow) as well as for the error handling cases (fault rules). There&#39;s also the case of a preflight request, in which the browser sends in a request with an OPTIONS verb to learn, beforehand, if the operation that it&#39;ll attempt next is even possible.</p>
+<p>To learn more about CORS, see the <a href="https://docs.apigee.com/api-platform/develop/adding-cors-support-api-proxy" target="_blank">Apigee CORS docs</a>.</p>
+<h2 is-upgraded><strong>Add preflight handling</strong></h2>
+<p>Our first step will be to handle the preflight that the browser will send in.</p>
+<p>In our proxy, in the PreFlow, let&#39;s add a RaiseFault policy named:</p>
+<pre>RF-PreFlightCORS</pre>
+<p>Use the following configuration:</p>
+<pre><code>&lt;RaiseFault async=&#34;false&#34; continueOnError=&#34;false&#34; enabled=&#34;true&#34; name=&#34;RF-PreFlightCORS&#34;&gt;
+    &lt;FaultResponse&gt;
+        &lt;Set&gt;
+            &lt;Headers&gt;
+                &lt;Header name=&#34;Access-Control-Allow-Origin&#34;&gt;{request.header.Origin}&lt;/Header&gt;
+                &lt;Header name=&#34;Access-Control-Allow-Headers&#34;&gt;apikey, content-type, origin, x-requested-with, accept&lt;/Header&gt;
+                &lt;Header name=&#34;Access-Control-Max-Age&#34;&gt;600&lt;/Header&gt;
+                &lt;Header name=&#34;Access-Control-Allow-Methods&#34;&gt;GET, PATCH, PUT, POST, DELETE&lt;/Header&gt;
+            &lt;/Headers&gt;
+            &lt;Payload/&gt;
+            &lt;StatusCode&gt;200&lt;/StatusCode&gt;
+            &lt;ReasonPhrase&gt;OK&lt;/ReasonPhrase&gt;
+        &lt;/Set&gt;
+    &lt;/FaultResponse&gt;
+    &lt;IgnoreUnresolvedVariables&gt;true&lt;/IgnoreUnresolvedVariables&gt;
+&lt;/RaiseFault&gt;</code></pre>
+<p>This policy must run before the Verify API Key policy:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c8d7af00189d9db2.png"></p>
+<p>We&#39;ll also need to add a condition for this policy to only execute if the incoming verb is OPTIONS and the incoming Origin header exists:</p>
+<pre><code>    &lt;PreFlow name=&#34;PreFlow&#34;&gt;
+        &lt;Request&gt;
+            &lt;Step&gt;
+                &lt;Condition&gt;request.verb == &#34;OPTIONS&#34; AND request.header.Origin != null&lt;/Condition&gt;
+                &lt;Name&gt;RF-PreFlightCORS&lt;/Name&gt;
+            &lt;/Step&gt;
+    ...</code></pre>
+<aside class="warning"><p>Warning: We are sending back the requested origin in the response via the Access-Control-Allow-Origin header, no matter what the origin is. This means that any origin will be allowed, and this API will lose much of the protection CORS is meant to provide. If the complete list of allowed origins is known, a more complete solution would allow only those origins.</p>
+</aside>
+<h2 is-upgraded><strong>Add CORS to the Response Flow</strong></h2>
+<p>The next step will be to add a policy to attach the same CORS headers for all success responses the API sends back.</p>
+<p>Given that this is information that the client needs, we&#39;ll add this policy to the Response in the PostFlow of the Proxy Endpoint. That ensure it&#39;ll execute as close to the client as possible.</p>
+<p>Choose an AssignMessage policy, and use the name:</p>
+<pre>AM-SetCORSHeaders</pre>
+<p>Configuration:</p>
+<pre><code>&lt;AssignMessage async=&#34;false&#34; continueOnError=&#34;false&#34; enabled=&#34;true&#34; name=&#34;AM-SetCORSHeaders&#34;&gt;
+    &lt;Set&gt;
+        &lt;Headers&gt;
+            &lt;Header name=&#34;Access-Control-Allow-Origin&#34;&gt;{request.header.Origin}&lt;/Header&gt;
+            &lt;Header name=&#34;Access-Control-Allow-Headers&#34;&gt;apikey, content-type, origin, x-requested-with, accept&lt;/Header&gt;
+            &lt;Header name=&#34;Access-Control-Max-Age&#34;&gt;600&lt;/Header&gt;
+            &lt;Header name=&#34;Access-Control-Allow-Methods&#34;&gt;GET, PATCH, PUT, POST, DELETE&lt;/Header&gt;
+        &lt;/Headers&gt;
+    &lt;/Set&gt;
+    &lt;IgnoreUnresolvedVariables&gt;true&lt;/IgnoreUnresolvedVariables&gt;
+    &lt;AssignTo createNew=&#34;false&#34; transport=&#34;http&#34; type=&#34;response&#34;/&gt;
+&lt;/AssignMessage&gt;</code></pre>
+<p>The flow should then look like:</p>
+<p class="image-container"><img style="width: 616.00px" src="img/1ca1c1eed2869e9f.png"></p>
+<p>We&#39;ll also need to add a condition for this policy to only execute if the incoming Origin header exists:</p>
+<pre><code>            &lt;Step&gt;
+                &lt;Condition&gt;request.header.Origin != null&lt;/Condition&gt;
+                &lt;Name&gt;AM-SetCORSHeaders&lt;/Name&gt;
+            &lt;/Step&gt;</code></pre>
+<h2 is-upgraded><strong>Add CORS to the error handling cases</strong></h2>
+<p>Our final configuration will be to use the same policy as above for the error responses.</p>
+<p>For that we&#39;ll be creating a DefaultFaultRule entry above the FaultRules section in the ProxyEndpoint, and adding a reference to the same policy:</p>
+<pre><code>&lt;ProxyEndpoint name=&#34;default&#34;&gt;
+    &lt;Description/&gt;
+    &lt;DefaultFaultRule&gt;
+        &lt;Step&gt;
+            &lt;Condition&gt;request.header.Origin != null&lt;/Condition&gt;
+            &lt;Name&gt;AM-SetCORSHeaders&lt;/Name&gt;
+        &lt;/Step&gt;
+    &lt;/DefaultFaultRule&gt;
+    &lt;FaultRules&gt;
+        &lt;FaultRule name=&#34;JSONThreat&#34;&gt;
+...</code></pre>
+<p>If a fault is raised during the TargetEndpoint processing, the TargetEndpoint FaultRules will be used. Therefore, we should also add the DefaultFaultRule to the TargetEndpoint, above the empty FaultRules section:</p>
+<pre><code>&lt;TargetEndpoint name=&#34;default&#34;&gt;
+    &lt;Description/&gt;
+    &lt;DefaultFaultRule&gt;
+        &lt;Step&gt;
+            &lt;Condition&gt;request.header.Origin != null&lt;/Condition&gt;
+            &lt;Name&gt;AM-SetCORSHeaders&lt;/Name&gt;
+        &lt;/Step&gt;
+    &lt;/DefaultFaultRule&gt;
+    &lt;FaultRules/&gt;
+...</code></pre>
+<p>Save the proxy. You can test your API in different scenarios and validate that you see the headers in trace being sent back to the client.</p>
+<p>OPTIONS preflight:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ead00891bddc0bbc.png"></p>
+<p>Normal GET with Origin:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e24f5ab13ee3688d.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a Developer Portal" duration="5">
+        <p>With our proxy ready, the next step is to create a portal, so we can publish the documentation and APIs to it.</p>
+<p>Go to Publish, and click on Portals</p>
+<p class="image-container"><img style="width: 347.00px" src="img/b51bf2c6ea26231f.png"></p>
+<p>Next, click on +Portal on the top right corner or &#34;Get started&#34; in the middle of the page:</p>
+<p class="image-container"><img style="width: 117.00px" src="img/e2694cb3b171f730.png"></p>
+<p class="image-container"><img style="width: 120.00px" src="img/ff1c0d4e0552d313.png"></p>
+<p>Just enter a name for your portal (retail) and click on Create.</p>
+<p>You should then see something like this to customize your portal:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/62912e0ecdf76ef5.png"></p>
+<p>To see your portal online, click on  ‘Live Portal&#39; at the top right corner:</p>
+<p class="image-container"><img style="width: 129.00px" src="img/7d1103c4eb539bb1.png"></p>
+<p>This will bring up your brand new portal with its default configuration for colors and branding:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/57e2089ebe30da9c.png"></p>
+<p>If you click on APIs, it should bring you to another page with an error message:</p>
+<p class="image-container"><img style="width: 435.00px" src="img/1fb4ec2a51b64b4f.png"></p>
+<p>We&#39;ll be adding our API to it next.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Publish the API to the portal" duration="5">
+        <h2 is-upgraded>Configure<strong> the frontend spec for our API</strong></h2>
+<p>Back in the UI, go to Develop, Specs.</p>
+<p>The retail-v1 spec we have is already a spec for our frontend, but it doesn&#39;t include our use of API keys to protect against unauthorized usage. We will edit our current spec, but if the changes don&#39;t work, we&#39;ll also have an option to upload a new frontend spec to use instead.</p>
+<h3 is-upgraded><strong>Edit the existing spec</strong></h3>
+<p>Click on the retail-v1 spec. We&#39;ll need to remove the Basic Authentication that was used for the product update (PATCH /products/{id}), and add API key support for all calls.</p>
+<p>For OpenAPI v3 spec security, defining security has two parts: the definition of the security type, and configuring which resources should use that security.</p>
+<p>It might be a good idea to copy the entire spec into a text editor, so you can start from the beginning if you have problems while editing. YAML (the format of the spec) requires specific spacing and indentation to work. If you make a mistake, the editor may point it out to you. Each indentation level is two spaces. Tabs are not allowed. The boxes below showing the changes to be made should have the right spacing if you copy entire lines.</p>
+<p>First, let&#39;s change the security definition from basic authentication to API key. You should find the securitySchemes section starting on line 316, if you only modified and didn&#39;t add or remove any lines. The securitySchemes section currently looks like this:</p>
+<pre>  securitySchemes:
+    basicAuth:
+      type: http
+      description: basic auth
+      scheme: basic</pre>
+<p>The section describes a scheme labeled &#34;basicAuth&#34; that uses the basic authentication scheme. We will no longer need this (we don&#39;t pass in credentials other than the API key). We will replace the basicAuth scheme with an API key scheme:</p>
+<pre>  securitySchemes:
+    apikey:
+      type: apiKey
+      in: header
+      name: apikey</pre>
+<p>The <em>in</em> and <em>name</em> fields indicate that the API key is found in a header named apikey. Remember that the indentation for all lines is important.</p>
+<p>Next, we&#39;ll remove the security defined for the update product resource. It should be found at line 224, and looks like this:</p>
+<pre>      security:
+        - basicAuth: []</pre>
+<p>Remove these two lines.</p>
+<p>Last, let&#39;s add API key validation for all resources. We&#39;ll insert this security specification at the top level, which will cause the apikey security scheme to be applied to all resources. It should be inserted just after the tags section and just before the paths section.</p>
+<pre>security:
+  - apikey: []</pre>
+<p>When inserted, it should look like this:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/66dfe8734053e2e7.png"></p>
+<h3 is-upgraded><strong>Test the Spec</strong></h3>
+<p>On the right side of the screen, you should see the rendering of the documentation. Click the Authorize button:</p>
+<p class="image-container"><img style="width: 592.00px" src="img/9e1451fdfa210dc.png"></p>
+<p>For APIKey, enter the key from your Application in the ‘Value&#39; box and click on Authorize:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/46be28f6c85b9bc6.png"></p>
+<p>Click on Close.</p>
+<p>Scroll down a little in the documentation and click on ‘Try it out&#39; for GET /categories:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/873658a99a219954.png"></p>
+<p>This will now show you the ‘Execute&#39; button. Click on it:</p>
+<p>You should then see the response from the server displayed in the documentation:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/a1857fcca2e8dfa5.png"></p>
+<p>If that is not what you see, retrace the previous steps back.</p>
+<p>If you see the following, your CORS headers are misconfigured:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5ca9993a13417c3b.png"></p>
+<aside class="special"><p>Note:</p>
+<p>For any issues where you may get the ‘TypeError: Failed to fetch, the best way to troubleshoot is via the browser&#39;s console in the developer tools.</p>
+<p class="image-container"><img style="width: 374.50px" src="img/b40011df47a920f1.png"></p>
+</aside>
+<h3 is-upgraded><strong>Import a new frontend spec (ONLY if editing existing spec failed)</strong></h3>
+<p>Create a new spec by clicking on +Spec and then selecting Import URL:</p>
+<p class="image-container"><img style="width: 264.00px" src="img/f65a8e3d6e623d54.png"></p>
+<p>Enter the name and URL to be used for the specification.</p>
+<p>Import Name:</p>
+<pre>retail-frontend</pre>
+<p>Import URL:</p>
+<pre>https://raw.githubusercontent.com/apigeekdemos/api-eng-training-resources/master/resources/specs/retail-frontend.yaml</pre>
+<p>Find YOURORG in the servers section (line 14) and replace it with your org name, and then save the spec.</p>
+<p class="image-container"><img style="width: 547.00px" src="img/2deab7734686ef0c.png"></p>
+<h2 is-upgraded><strong>Link the Spec to the API</strong></h2>
+<p>Back in Publish/Portals, select your portal and click on APIs:</p>
+<p class="image-container"><img style="width: 296.00px" src="img/ed9313f11f208b45.png"></p>
+<p>This is where we&#39;ll associate the documentation with an API product.</p>
+<p>Click on + API</p>
+<p class="image-container"><img style="width: 118.00px" src="img/7c5d398c24624591.png"></p>
+<p>In the new popup, select your product, and click on Next:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/54e7f93b55d4c7af.png"> </p>
+<p>Now we need to link it to the specification that will serve as the documentation for our API:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e23785bd9809ddfc.png"></p>
+<p>Click on ‘Choose a different spec...&#39;</p>
+<p>Then, go to ‘My Specs&#39; and select your frontend spec (<strong>retail-v1</strong> if you successfully updated your spec, <strong>retail-frontend</strong> if you had to upload a new one) and click on Select:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/79b70606718e0c95.png"></p>
+<p>Click on Next and update any information as needed:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2fe314076781c583.png"></p>
+<p>Click on Finish.</p>
+<p>Back in the live portal, if you refresh the page you should now see a tile for the newly linked API in the portal:</p>
+<p class="image-container"><img style="width: 354.00px" src="img/91012d3f5bf1a221.png"></p>
+<p>And, if you click on it, it&#39;ll take you to the API documentation, now live in the portal:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/74eccd744f249cd.png"></p>
+<p>You should also Authorize and test the APIs from here.</p>
+<p class="image-container"><img style="width: 493.00px" src="img/93434e296118d9bb.png"></p>
+<p>Click Authorize and then OK.</p>
+<p>Click on GET /categories, and Execute to try it out:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/a3e46eeb3ba5c17f.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Developers self-service" duration="5">
+        <h2 is-upgraded><strong>Create a new developer account from the portal</strong></h2>
+<p>At the top, right corner in the portal, click on ‘Sign In&#39;</p>
+<p class="image-container"><img style="width: 168.00px" src="img/15d1a377595602c.png"></p>
+<p>This will bring up the login page for the portal, from where you can also create an account.</p>
+<p class="image-container"><img style="width: 480.00px" src="img/95b25aefd2fcb4ba.png"></p>
+<p>Click on ‘Create account&#39; and enter the information required.</p>
+<p class="image-container"><img style="width: 422.00px" src="img/d27e32e4da59a3b9.png"></p>
+<p>The email needs to be a valid email in order for you to validate the account before being able to use it.</p>
+<p>After you click on the ‘Create Account&#39; button, wait a few minutes and check your email inbox for an email with the subject &#34;Verify your new account&#34;</p>
+<p class="image-container"><img style="width: 375.00px" src="img/54f659c76f8d2a67.png"></p>
+<p>Click on the link in the email, which should take you back to the portal.</p>
+<p>You can now click on ‘Sign In&#39; and enter your credentials and click on the ‘Sign In&#39; button.</p>
+<p>After you are logged in, you should see a new drop down option at the top of the page, with the email address:</p>
+<p class="image-container"><img style="width: 432.00px" src="img/b5354e86aeb57.png"></p>
+<p>As you click on the drop down menu, you should now see 2 options:</p>
+<ul>
+<li>Apps</li>
+<li>Sign Out</li>
+</ul>
+<p class="image-container"><img style="width: 445.00px" src="img/e9bb9a0e30396313.png"></p>
+<p>Click Apps. This is where you&#39;ll find all the apps that a developer may have already created, or in this case for a brand new account, the list should be empty.</p>
+<h2 is-upgraded><strong>Create a new application from the portal</strong></h2>
+<p>At the top, right corner in the portal, click on ‘+ New App</p>
+<p class="image-container"><img style="width: 179.00px" src="img/1fda8e543afe816.png"></p>
+<p>Enter the details for your app. Make sure to flip the switch on the Retail API at the bottom to enable the Create button, and when done, click on Create:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/926f29b5f649be6a.png"></p>
+<p>And this will bring you to the details of you new App, created from the portal.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/da4c4f7f079a87f0.png"></p>
+<p>This is how users of your API can self register to get an API key to call the retail-v1 API.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You now know how to publish your API documentation to a developer portal.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

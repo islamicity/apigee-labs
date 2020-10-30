@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-14T23:32:34Z",
+  "id": "apigee-api-engineer-supplemental-lab-08b-parallel-apis-with-js",
+  "duration": 15,
+  "title": "Supplemental Lab 08b: Parallel API Calls with JS",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to invoke multiple APIs in parallel with JavaScript",
+  "source": "1jxIVxKYrXAfpg7Tfjay3xNL6ctiZj5TLVHmBuVFSELc",
+  "theme": "supplemental",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Supplemental"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-supplemental-lab-08b-parallel-apis-with-js"
+}

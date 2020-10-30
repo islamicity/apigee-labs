@@ -1,0 +1,157 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Supplemental Lab 02a: Proxy Endpoints and Route Rules</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-supplemental-lab-02a-route-rules"
+                  title="Supplemental Lab 02a: Proxy Endpoints and Route Rules"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>When building proxies that must have different behaviors depending on where the request is coming from, you can leverage the use of multiple Proxy Endpoints with different configurations to properly identify and process these requests.</p>
+<p>We will also learn how to use different Target Endpoints, or no target at all.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>Handle requests differently based on how the API is invoked</li>
+<li>Route requests to different target endpoints </li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>You get requests coming in via HTTP and HTTPS. You only want to handle the requests over a secure connection, so you want to instruct the developers to use HTTPS whenever they send in a request via HTTP.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Create a new Proxy</li>
+<li>Create a new Proxy Endpoint for http requests</li>
+<li>Route the HTTP requests to no target at all</li>
+<li>Make sure the default Proxy Endpoint only handles secure requests </li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a new Proxy" duration="5">
+        <p>Go back to the Develop-&gt;API Proxies menu in the UI and create a new Reverse Proxy. The backend (existing API) can be anything. We&#39;ll use <a href="https://httpbin.org/" target="_blank">httpbin.org</a>, a useful test backend for HTTP requests and responses. Specifically, the endpoint we use will show information from the request in a 200 OK response.</p>
+<p class="image-container"><img style="width: 246.00px" src="img/d393fee6ab56b0e5.png"></p>
+<p>Enter the proxy details:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Proxy Name</p>
+</td><td colspan="1" rowspan="1"><p>lab2a-v1</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Proxy Base Path</p>
+</td><td colspan="1" rowspan="1"><p>/lab2a/v1</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Existing API</p>
+</td><td colspan="1" rowspan="1"><p>https://httpbin.org/anything</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/59ddf481c8cb3865.png"></p>
+<p>Select ‘Pass through (none)&#39; for Authorization.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/befc375646991ec2.png"></p>
+<p>Uncheck the default virtual host. We&#39;ll be adding the default virtual host in a new ProxyEndpoint.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5ded18de2d0c87b2.png"></p>
+<p>Deploy the proxy to the test environment.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a new Proxy Endpoint" duration="5">
+        <p>In the new proxy, click in the Develop tab:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b13fc23cd73fadd0.png"></p>
+<p>Look for the <strong>Proxy Endpoint</strong> configurations and click on the &#34;+&#34; sign next to the Proxy Endpoints header:</p>
+<p class="image-container"><img style="width: 280.00px" src="img/f8d3143b40805b86.png"></p>
+<p>You should see a popup screen asking for a name for the new Proxy Endpoint:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d4c1ed47bd416643.png"></p>
+<p>Let&#39;s call it:</p>
+<pre><code>PlainHTTP</code></pre>
+<p>Click on ‘Add&#39;</p>
+<p>Your newly created Proxy Endpoint will show up right above the existing Target Endpoints:</p>
+<p class="image-container"><img style="width: 282.00px" src="img/1967f087b5f07ba.png"></p>
+<p>Select it and you should see the XML on the right. Pay special attention to lines 14 to 21:</p>
+<p class="image-container"><img style="width: 418.00px" src="img/ecdf7efa01fc1.png"></p>
+<p>We will need to update it to have the same BasePath as our original Proxy Endpoint, as well as update the RouteRules.</p>
+<h2 is-upgraded><strong>Updating the BasePath and VirtualHost</strong></h2>
+<p>For the HTTPProxyConnection, we&#39;re going to use this ProxyEndpoint to handle all non-HTTPS (unencrypted) traffic. Llet&#39;s enter the following (replace the HTTPProxyConnection section with the one below):</p>
+<pre><code>    &lt;HTTPProxyConnection&gt;
+        &lt;BasePath&gt;/lab2a/v1&lt;/BasePath&gt;
+        &lt;VirtualHost&gt;default&lt;/VirtualHost&gt;
+    &lt;/HTTPProxyConnection&gt;</code></pre>
+<h2 is-upgraded><strong>Updating the RouteRules</strong></h2>
+<p>The current RouteRules sends the request to the default TargetEndpoint. Instead, for non-encrypted traffic, we don&#39;t want traffic going to the backend. We&#39;ll replace the whole RouteRules block with a single line:</p>
+<pre><code>   &lt;RouteRule name=&#34;noTarget&#34;/&gt;</code></pre>
+<p>Here&#39;s how your PlainHTTP ProxyEndpoint should look after both changes:</p>
+<p class="image-container"><img style="width: 452.00px" src="img/fce9da3f49d9416f.png"></p>
+<h2 is-upgraded><strong>Add an error message to the developer for when they call the API via HTTP</strong></h2>
+<p>We&#39;ll also add a policy to send back a more informative response to let the developers know that requests over plain HTTP are not supported.</p>
+<p>Add an AssignMessage policy to the PreFlow in the ‘PlainHTTP&#39; endpoint. Click on ‘PreFlow&#39; under the ‘PlainHTTP&#39; endpoint, and click on the ‘+ Step&#39; button.</p>
+<p class="image-container"><img style="width: 619.00px" src="img/a8850ce4a8052140.png"></p>
+<p>Use the name:</p>
+<pre><code>AM-400BadRequestHTTP</code></pre>
+<p>With this configuration:</p>
+<pre><code>&lt;AssignMessage async=&#34;false&#34; continueOnError=&#34;false&#34; enabled=&#34;true&#34; name=&#34;AM-400BadRequestHTTP&#34;&gt;
+    &lt;Set&gt;
+        &lt;StatusCode&gt;400&lt;/StatusCode&gt;
+        &lt;ReasonPhrase&gt;Bad Request&lt;/ReasonPhrase&gt;
+        &lt;Payload contentType=&#34;application/json&#34;&gt;{
+    &#34;message&#34;:&#34;HTTP is not supported. Please change your request to HTTPS and try again.&#34;,
+    &#34;url&#34;:&#34;https://{request.header.host}{proxy.basepath}{proxy.pathsuffix}?{request.querystring}&#34;
+}&lt;/Payload&gt;
+    &lt;/Set&gt;
+    &lt;IgnoreUnresolvedVariables&gt;true&lt;/IgnoreUnresolvedVariables&gt;
+    &lt;AssignTo createNew=&#34;true&#34; transport=&#34;http&#34; type=&#34;response&#34;/&gt;
+&lt;/AssignMessage&gt;</code></pre>
+<h2 is-upgraded><strong>Updating the Default Proxy Endpoint</strong></h2>
+<p>Double check that your default Proxy Endpoint only has the ‘secure&#39; VirtualHost configured. Remove the line with ‘default&#39; if needed. It should look like:</p>
+<p class="image-container"><img style="width: 456.00px" src="img/c5c4c1945c86b8d.png"></p>
+<p>Click on ‘Save&#39;.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test your changes" duration="5">
+        <p>Testing will be done the exact same way as in the previous lab. Send a <strong>GET</strong> request to your proxy with the exception that the URl should start with HTTP this time. You should then be getting a <strong>400 Bad Request </strong>as response with the exact payload as set in the policy above.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/725a614a5092b446.png"></p>
+<p>Notice that in the trace, there should be no invocation of the backend as well as there&#39;s no Target Endpoint being called.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/82d9b5cf52dbbd60.png"></p>
+<p>Make sure to test the previous scenario as well (https to same endpoint), which should return you a 200 OK with information from httpbin.org.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You have successfully created a separated ProxyEndpoint to handle non secure requests to your API.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

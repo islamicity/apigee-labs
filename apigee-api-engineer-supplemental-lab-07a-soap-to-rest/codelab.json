@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-11T18:19:36Z",
+  "id": "apigee-api-engineer-supplemental-lab-07a-soap-to-rest",
+  "duration": 5,
+  "title": "Supplemental Lab 07a: SOAP to REST",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to convert a legacy SOAP service to a REST API",
+  "source": "1rpj6a27ZedxY3mnb829IpeTdB2HERzFPMd_vWI4yfzE",
+  "theme": "supplemental",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Supplemental"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-supplemental-lab-07a-soap-to-rest"
+}

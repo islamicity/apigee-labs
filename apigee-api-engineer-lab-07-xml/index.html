@@ -1,0 +1,129 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Lab 07: Add XML Support</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-lab-07-xml"
+                  title="Lab 07: Add XML Support"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>Clients to your API may have the need to use data in different formats than the default format returned by your API. </p>
+<p>We&#39;ll add the option to allow the user to select between JSON and XML.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to easily convert between JSON and XML</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Your proxy created in the previous lab</li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>You want to allow the option to the clients of the API to choose the response format.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="SKIP (unless your current proxy is broken)" duration="0">
+        <aside class="warning"><p><strong>Important</strong>: This section should only be used if you were unable to complete the last lab and your proxy is not at a good starting point.</p>
+</aside>
+<p>Download a working solution to the previous lab as a proxy bundle ZIP file:</p>
+
+<p><a href="https://api-eng-labs-snapshot-201910.storage.googleapis.com/retail-v1-lab06.zip" target="_blank"><paper-button class="colored" raised><iron-icon icon="cloud_download"></iron-icon>Download Lab 06 Bundle</paper-button></a></p>
+<p>Prerequisites:</p>
+<ul>
+<li>Target Server: TS-Retail (instructions in lab 2)</li>
+<li>Product, Developer and App (instructions in lab 3)</li>
+<li>Key Value Map: ProductsKVM (instructions in lab 6)</li>
+</ul>
+
+<p>Find your spec ID. When you open your spec in the spec editor, the link will be in this format, with the spec ID at the end of the URL:</p>
+<pre>https://apigee.com/organizations/YOURORG/specs/folder/FOLDERID/editor/YOURSPECID</pre>
+<p>Navigate to your proxy and upload the bundle as a new revision:</p>
+<p class="image-container"><img style="width: 190.00px" src="https://lh5.googleusercontent.com/U7eHM38KSVuHmVqm58-GOV1BNkyBkzUaa7jYtEm15a0HU8cCU9UTGPyUv1bIbVAvSGxUHhUTF7tn9e_Mnm5ok9tMNmbCCn20vwS5uCXTS7pt_aNl6lZgFqvcC4ADsC7zb_XdV8H-"></p>
+<p><br>Select the association.json resource. Replace YOURORG and YOURSPECID with the values from the spec URL.</p>
+<p class="image-container"><img style="width: 624.00px" src="https://lh5.googleusercontent.com/ctOmzbmP_57QYyXSHNaMm02rgpaDsZx6MV0ov43mq_P0g21JGZL1YRrtjLOA7bYHjga_CYyTTmW3oNfAFhkLS2Si0AGeFwbHFZ4IjIspYzEOffGKB3x8cC1q2n6nhqhpdzTSnzhk"></p>
+<p>Once updated, the association.json should look something like this:</p>
+<pre>{
+        &#34;url&#34;: &#34;/organizations/apigeek-eval/specs/doc/207966/content&#34;
+}</pre>
+<p>Click Save to save your proxy. Open the Deployment menu, and check the deployment status. Click on test to deploy this revision of the proxy.</p>
+<p class="image-container"><img style="width: 610.00px" src="https://lh6.googleusercontent.com/gCwM-0EwiOOuVyFAOT_iedp3lDt0oMYZ0WohqVRZFY2UqXVdbYVErNH7AAAvXHcY2TX9KDwwfNrTkrAoeMMykOlRZAUGsV9oK_oOZbClP-9q8FBWqSZNvlDGWJuxuMAJZxJrABth"></p>
+<p>Test will be green when it is deployed.</p>
+<p class="image-container"><img style="width: 173.00px" src="https://lh5.googleusercontent.com/si6k0W9lOHNqymFdUCNBb3ljb3GF4F41StR3Cm7g3e9b5J1Zsi56WHgQQB3bGctAsCJWYVFKCxrPf57OAwpi8-zf3FRc6hGpo8yDNjsSaNYAwp6eOATSBCknxi-DeYbtctEZzqQV"></p>
+
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Add a JSONtoXML policy with a condition</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a JSONtoXML policy with a condition" duration="5">
+        <p>HTTP allows for the client to choose the format of the response via the ‘Accept&#39; header. The content of the header follows the same guidelines as the Content-Type header, meaning that the same MIME types are allowed.</p>
+<p>In our API so far, we have been using application/json only, we&#39;ll now add the option for clients to choose XML responses.</p>
+<aside class="special"><p>Note: Clients that want responses in XML generally want to provide their input via XML as well. This lab doesn&#39;t add policies to accept XML as input, but feel free to add that feature using the XMLToJSON policy after you&#39;ve finished the lab.</p>
+</aside>
+<p>Select the ‘PostFlow&#39; in the Proxy Endpoint (not the Target Endpoint), and click on the ‘+ Step&#39; on the response flow (bottom portion)</p>
+<p class="image-container"><img style="width: 624.00px" src="img/fb951c0889371950.png"></p>
+<p>Select the JSON to XML policy, and change the display name:</p>
+<pre>J2X-Convert</pre>
+<p>Click Add:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/eb41061e9a36d9e.png"></p>
+<p>In the configuration panel, make sure you see the Endpoint XML and not the policy configuration. Switch tabs as needed:</p>
+<p class="image-container"><img style="width: 580.00px" src="img/e1777e7ae75fc7f0.png"></p>
+<p>Inside the &lt;Step&gt; tag for the JSON to XML policy, add the following condition:</p>
+<pre><code>&lt;Condition&gt;request.header.Accept == &#34;application/xml&#34;&lt;/Condition&gt;</code></pre>
+<p class="image-container"><img style="width: 579.00px" src="img/112fe2bccfef1875.png"></p>
+<p>Save and deploy your proxy. Test it with the following request:</p>
+<p>URL:</p>
+<pre><code>GET /products/31001</code></pre>
+<p>Headers:</p>
+<pre><code>apikey: {key of application}
+Accept: application/xml</code></pre>
+<p>You should get XML in the response:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/64791504d9136f7d.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You have successfully implemented a simple way to provide responses in multiple formats from your API.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

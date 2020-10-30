@@ -1,0 +1,269 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Supplemental Lab 08b: Parallel API Calls with JS</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-supplemental-lab-08b-parallel-apis-with-js"
+                  title="Supplemental Lab 08b: Parallel API Calls with JS"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>Sometimes there may be cases where you have multiple services that need to be invoked in order to build the final response. Invoking these services in parallel may reduce latency.</p>
+<p>JavaScript policies allow you to call services in parallel.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to make API calls from JavaScript</li>
+<li>Separate requests from responses in order to run them in parallel </li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Basic knowledge of the <a href="https://docs.apigee.com/api-platform/reference/javascript-object-model#makingjavascriptcalloutswithhttpclient-abouthttpclient" target="_blank">httpClient in Apigee</a></li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>Imagine you have a service that invokes <a href="https://developers.google.com/books/" target="_blank">Google&#39;s Book APIs</a>. And in your service, instead of having the client to call the API multiple times for different searches, you want to offer the option to pass in a comma-separated list of queries.</p>
+<p>Your API:</p>
+<p>https://api.example.com/books?query=google,apigee,chocolate</p>
+<p>Should return one response with a list of books about Google, Apigee and chocolate.</p>
+<p>In Google&#39;s current book API, you have to call the same API 3 times, 1 for each search term.</p>
+<p>Example:</p>
+<p>https://www.googleapis.com/books/v1/volumes?q=google</p>
+<p>https://www.googleapis.com/books/v1/volumes?q=apigee</p>
+<p>https://www.googleapis.com/books/v1/volumes?q=chocolate</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Create a proxy</li>
+<li>Add a Javascript policy for the requests</li>
+<li>Add a Javascript policy for the responses</li>
+<li>Test </li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a proxy" duration="5">
+        <p>Under Develop, click on API Proxies</p>
+<p class="image-container"><img style="width: 225.00px" src="img/e855ee182238b10c.png"></p>
+<p>Click on ‘+ Proxy&#39;</p>
+<p class="image-container"><img style="width: 109.00px" src="img/d7264730a7884a2d.png"></p>
+<p>Enter the details for the proxy to be created. Select ‘No Target&#39;, click on Next</p>
+<p class="image-container"><img style="width: 624.00px" src="img/a2574cfaa553224f.png"></p>
+<p>Specify the proxy details and click on Next:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Name</p>
+</td><td colspan="1" rowspan="1"><p>lab8b-v1</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Proxy Base Path</p>
+</td><td colspan="1" rowspan="1"><p>/lab8b/v1</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/9eaa78ff08715f1d.png"></p>
+<p>Select ‘pass through&#39; for authorization, click on Next</p>
+<p class="image-container"><img style="width: 624.00px" src="img/da720336d2a0196.png"></p>
+<p>Deselect &#39;default&#39;, and make sure &#39;secure&#39; is checked for the Virtual hosts, click on Next</p>
+<p class="image-container"><img style="width: 343.00px" src="img/fbd6cc8adc43fa80.png"></p>
+<p>Finally, check the ‘test&#39; environment and click on ‘Build and Deploy&#39;</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1b2be369523402ac.png"></p>
+<p>When done, you can click on View lab8b-v1 proxy in editor to see what&#39;s been created.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b41d772a0581fcae.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a JavaScript policy to send the requests" duration="5">
+        <p>We&#39;ll be receiving the parameters as a comma separated list of queries, therefore, we&#39;ll need to first parse the list and then we can iterate on it.</p>
+<p>Go to the ‘Develop&#39; tab and select the PreFlow</p>
+<p class="image-container"><img style="width: 292.00px" src="img/70c01e9ac179e2aa.png"></p>
+<p class="image-container"><img style="width: 247.00px" src="img/3bcb202e849194eb.png"></p>
+<p>Add a new JavaScript policy, by clicking on ‘+ Step&#39; in the request flow</p>
+<p class="image-container"><img style="width: 505.00px" src="img/daaa7ab789cbc121.png"> </p>
+<p>Details:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Display Name</p>
+</td><td colspan="1" rowspan="1"><p>JS-SendRequests</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Name</p>
+</td><td colspan="1" rowspan="1"><p>JS-SendRequests</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Script File</p>
+</td><td colspan="1" rowspan="1"><p>Create new script</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Script Name</p>
+</td><td colspan="1" rowspan="1"><p>sendRequests.js</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/403d10a31c89cf84.png"></p>
+<p>A new file will appear under Resources:</p>
+<p class="image-container"><img style="width: 276.00px" src="img/3fc09ce090d9722d.png"></p>
+<p>Click on it to see the JS code editor and enter the following:</p>
+<pre><code>// q is the query parameter with a comma separated list of topics for the books to be searched
+var q = context.getVariable(&#34;request.queryparam.q&#34;).split(&#34;,&#34;);
+print(q);
+
+// URL to the Google Books API
+var url=&#34;https://www.googleapis.com/books/v1/volumes?q=subject:&#34;;
+
+// Iterate for each search term, call the Google API
+for (var i=0; i &lt; q.length; i++) {
+    print(&#34;&#34; + i + &#34;: &#34; + q[i]);
+    print(&#34;GET &#34; + url + &#34;&#34;+q[i]);
+    var req = httpClient.get(url+q[i]);
+
+    // store the request in a session for later retrieval
+    context.session[q[i]] = req;
+}
+
+print(&#34;done sending the requests&#34;);</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/9df98ce10eb9b738.png"></p>
+<p>The code above will make a separate API request for each term passed into our API proxy, but will not wait until the response arrives. This means that all requests are made in parallel, or asynchronous.</p>
+<p>The request objects are then stored in the context.session object -- other JavaScript policies can retrieve entities stored in context.session.</p>
+<p>Save your proxy.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a JavaScript policy to retrieve the responses" duration="5">
+        <p>Similarly to how we handled the requests, we&#39;ll add a new JavaScript policy to handle the responses.</p>
+<p>Click on ‘+ Step&#39; in the PreFlow Request:</p>
+<p class="image-container"><img style="width: 557.00px" src="img/3557066c1a38c75c.png"></p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Display Name</p>
+</td><td colspan="1" rowspan="1"><p>JS-ProcessResponses</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Name</p>
+</td><td colspan="1" rowspan="1"><p>JS-ProcessResponses</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Script File</p>
+</td><td colspan="1" rowspan="1"><p>Create new script</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Script Name</p>
+</td><td colspan="1" rowspan="1"><p>processResponses.js</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/49eabe1eaf3831c7.png"></p>
+<p>The new script will appear under Resources</p>
+<p class="image-container"><img style="width: 306.00px" src="img/2fd97594b4e2834c.png"></p>
+<p>Click on processResponses.js to see the JS code editor and enter the following:</p>
+<pre><code>// q is a comma separated list of topics for the books to be searched
+var q = context.getVariable(&#34;request.queryparam.q&#34;).split(&#34;,&#34;);
+print(q);
+
+var resp = [];
+
+for (var i=0; i &lt; q.length; i++) {
+    // retrieve request object from session
+    req = context.session[q[i]];
+    req.waitForComplete();
+    print(&#34;Got response for &#34; + q[i]);
+
+    if (req.isSuccess()) {
+        item = { 
+            query : q[i],
+            result : JSON.parse(req.getResponse().content)
+        };
+        resp.push(item);  
+        print(item);
+    }
+    else {
+        item = {
+            query : q[i],
+            result : null
+        }
+        resp.push(item);  
+        print(item);   
+    }
+}
+
+print(&#34;done with responses&#34;);
+
+// store response in a temporary flow variable
+context.setVariable(&#34;myResp&#34;, JSON.stringify(resp));</code></pre>
+<p>The code above will retrieve all the requests previously stored in the session, and wait for each to complete before attempting to read its response.</p>
+<p>It will combine all responses into a single object.</p>
+<p>Note that you could also have put the response JavaScript policy in the response flow if you wanted.</p>
+<p>Our final step now is to make sure the client of our API receives our newly created response.</p>
+<p>Click on the ‘+ Step&#39; in the response flow for the PreFlow</p>
+<p class="image-container"><img style="width: 428.00px" src="img/fa3b3ec6c5db6c98.png"></p>
+<p>Select the AssignMessage policy and name it:</p>
+<pre><code>AM-SetResponse</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/c16440cfcb2ff7ae.png"></p>
+<p>And make sure the code for the policy looks like:</p>
+<pre><code>&lt;AssignMessage async=&#34;false&#34; continueOnError=&#34;false&#34; enabled=&#34;true&#34; name=&#34;AM-SetResponse&#34;&gt;
+    &lt;Set&gt;
+        &lt;Payload contentType=&#34;application/json&#34;&gt;{myResp}&lt;/Payload&gt;
+    &lt;/Set&gt;
+
+    &lt;IgnoreUnresolvedVariables&gt;true&lt;/IgnoreUnresolvedVariables&gt;
+    &lt;AssignTo createNew=&#34;false&#34; transport=&#34;http&#34; type=&#34;response&#34;/&gt;
+&lt;/AssignMessage&gt;</code></pre>
+<p>Save your proxy.</p>
+<p>To test it, invoke your proxy by passing the query parameter q with a list of terms to search books about.</p>
+<p>Example:<br></p>
+<pre><code>&gt; GET /lab8b?q=miami,dallas HTTP/1.1
+&lt; HTTP/1.1 200 OK
+&lt; Content-Type: application/json
+[
+  {
+    &#34;query&#34;:&#34;miami&#34;,
+    &#34;result&#34;:null
+  },
+  {
+    &#34;query&#34;:&#34;dallas&#34;,
+    &#34;result&#34;:
+    {
+      &#34;kind&#34;:&#34;books#volumes&#34;,
+...
+    }
+  }
+]</code></pre>
+<p>Note</p>
+<aside class="special"><p>If you start seeing errors in the response (&#34;result&#34;:null), it may make sense to increase the timeLimit on the JavaScript policies to something bigger than the default 200ms. The timeLimit setting is in the JavaScript policy:</p>
+<p class="image-container"><img style="width: 610.00px" src="img/aa02b66c2e9b3da5.png"></p>
+<p>You can also set continueOnError to true. If the time limit is exceeded, you should be able to return the results you got before the policy stopped.</p>
+<p>JavaScript policies will end the execution after 200ms, whether or not the code completed running. Note that evaluation orgs may not allow a timeLimit greater than 200ms. More details <a href="https://docs.apigee.com/api-platform/reference/policies/javascript-policy#JavaScript" target="_blank">here</a>.</p>
+</aside>
+<p>Note 2</p>
+<aside class="special"><p>In this scenario specifically, you could combine both JavaScript policies into a single script and a single policy. The goal of this lab was to show how you can potentially have the requests sent out, process other tasks, and then after that, receive the responses. In this example, it means that you can add other policies in between the 2 JavaScript policies in here to handle other tasks, while the Google Book APIs are processing.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You have successfully created a proxy capable of invoking other APIs in parallel.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>
