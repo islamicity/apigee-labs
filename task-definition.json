@@ -1,0 +1,29 @@
+{
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "inferenceAccelerators": [],
+    "containerDefinitions": [
+        {
+            "name": "apigee-labs",
+            "image": "971071690837.dkr.ecr.eu-central-1.amazonaws.com/appythings/apigee-labs:prod",
+            "resourceRequirements": null,
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": "8080",
+                    "protocol": "tcp"
+                }
+                
+            ]
+        }
+    ],
+    "volumes": [],
+    "networkMode": "awsvpc",
+    "memory": "512",
+    "cpu": "256",
+    "executionRoleArn": "arn:aws:iam::971071690837:role/ecsTaskExecutionRole",
+    "family": "AWS-AR-TD-TOOLS-AL-P-FE",
+    "taskRoleArn": "",
+    "placementConstraints": []
+}
