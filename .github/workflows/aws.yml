@@ -52,5 +52,5 @@ jobs:
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: ${{ secrets.AWS_ECS_SERVICE }}
-        cluster: ${{ secrets.AWS-AT-CL-TOOLS }}
+        cluster: ${{ secrets.AWS_ECS_CLUSTER }}
         wait-for-service-stability: true
