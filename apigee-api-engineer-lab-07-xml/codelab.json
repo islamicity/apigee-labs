@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-08T17:35:56Z",
+  "id": "apigee-api-engineer-lab-07-xml",
+  "duration": 5,
+  "title": "Lab 07: Add XML Support",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to send responses in the format selected by the user",
+  "source": "1FRetJDagEeG0U1kw62NP9T6slYyIgLIPrNXJ-4-n88o",
+  "theme": "day-2",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Day 2"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-lab-07-xml"
+}

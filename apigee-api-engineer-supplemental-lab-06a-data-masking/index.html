@@ -1,0 +1,175 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Supplemental Lab 06a: Data Masking</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-supplemental-lab-06a-data-masking"
+                  title="Supplemental Lab 06a: Data Masking"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>In this lab you will learn how to use the built-in wizard to convert existing SOAP to a Rest API. The wizard generates the basic configuration that can then be used as a starting point for your production proxy.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to protect sensitive data from being displayed during trace sessions</li>
+<li>How to protect variables by prefixing them</li>
+<li>How to create data masks via Apigee&#39;s Management APIs</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Basic understanding of data masking on Apigee <a href="https://docs.apigee.com/api-platform/security/data-masking" target="_blank">https://docs.apigee.com/api-platform/security/data-masking</a></li>
+<li>Basic understanding of the Data Mask API<br><a href="https://apidocs.apigee.com/api-reference/content/data-masks" target="_blank">https://apidocs.apigee.com/api-reference/content/data-masks</a></li>
+<li>The default ‘helloworld&#39; proxy -- download from <a href="https://api-eng-labs-snapshot-201910.storage.googleapis.com/helloworld.zip" target="_blank">here</a> and deploy it to the test environment if you don&#39;t already have it in your org</li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>You want to protect sensitive data from being displayed during trace.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Mark variables as private</li>
+<li>Create data masks configurations for a proxy</li>
+<li>Create data masks configurations for the whole organization </li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Mark variables as private" duration="5">
+        <p>By default most variables are visible during a trace session. If you want to protect its contents, you may mark a variable as private and its content will be masked during tracing.</p>
+<p>Go to Develop/API Proxies:</p>
+<p class="image-container"><img style="width: 218.00px" src="img/666f76726440b477.png"></p>
+<p>And select the sample proxy called ‘helloworld&#39;. It should have already been there when you created your eval account.</p>
+<p>Now let&#39;s save this proxy as a new proxy. Click the Project button and select &#39;Save as New API Proxy...&#39;:</p>
+<p class="image-container"><img style="width: 197.00px" src="img/f3b8d7213de5abe1.png"></p>
+<p>Name the new proxy:</p>
+<pre>lab6a-v1</pre>
+<p class="image-container"><img style="width: 624.00px" src="img/e62ca3c8ca6cd34b.png"></p>
+<p>You won&#39;t be able to deploy the proxy until you change the HTTPProxyConnection configuration, since the same virtual hosts + basepath is already deployed as helloworld.</p>
+<p>Click on the Develop tab and change the HTTPProxyConnection to this:</p>
+<pre>    &lt;HTTPProxyConnection&gt;
+        &lt;BasePath&gt;/lab6a/v1&lt;/BasePath&gt;
+        &lt;VirtualHost&gt;secure&lt;/VirtualHost&gt;
+    &lt;/HTTPProxyConnection&gt;</pre>
+<p>Save and deploy the proxy to the test environment. Click the Deployment button, and click on the test environment.</p>
+<p class="image-container"><img style="width: 169.00px" src="img/5c28126ef1aa377c.png"></p>
+<p>Which will bring up a popup to confirm the deployment:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/84e9490793a09931.png"></p>
+<p>Click on ‘Deploy&#39;.</p>
+<p>Go to the Develop tab and click on the PreFlow (under the Proxy Endpoints)</p>
+<p class="image-container"><img style="width: 624.00px" src="img/945a00a1daec0cae.png"></p>
+<p>Click on the ‘+ Step&#39; button to add a policy right after the one called ‘Add CORS&#39;</p>
+<p class="image-container"><img style="width: 566.00px" src="img/8caa4fa0a04df54f.png"></p>
+<p>In the new pop up window, scroll down to find the Extract Variables policy and select it. Name the new policy: </p>
+<pre><code>EV-QueryParamTest</code></pre>
+<p class="image-container"><img style="width: 624.00px" src="img/e0242225813d9e52.png"></p>
+<p>Click on Add.</p>
+<p>You should now see the new policy in place in the flow, as well as its default configuration.</p>
+<p class="image-container"><img style="width: 553.00px" src="img/b1ac48eef7138548.png"></p>
+<p>In the XML editor at the bottom of your window, replace the contents of the policy with the following:</p>
+<pre><code>&lt;ExtractVariables async=&#34;false&#34; continueOnError=&#34;false&#34; enabled=&#34;true&#34; name=&#34;EV-QueryParamTest&#34;&gt;
+    &lt;QueryParam name=&#34;test&#34;&gt;
+        &lt;Pattern ignoreCase=&#34;true&#34;&gt;{test}&lt;/Pattern&gt;
+    &lt;/QueryParam&gt;
+    &lt;IgnoreUnresolvedVariables&gt;true&lt;/IgnoreUnresolvedVariables&gt;
+    &lt;Source clearPayload=&#34;false&#34;&gt;request&lt;/Source&gt;
+    &lt;VariablePrefix&gt;apigee&lt;/VariablePrefix&gt;
+&lt;/ExtractVariables&gt;</code></pre>
+<p>This will tell the policy to look for a query parameter called ‘test&#39; and copy its contents to a variable called ‘test&#39;, but with a prefix of ‘apigee&#39;. The new variable will be referenced as ‘apigee.test&#39;.</p>
+<p>Save your changes and make sure your proxy is deployed.</p>
+<p class="image-container"><img style="width: 189.00px" src="img/2aee8c738c3c073.png"></p>
+<p class="image-container"><img style="width: 217.00px" src="img/43205feba22ab645.png"></p>
+<p>Switch to the Trace tab, select the test environment and start a new trace session.</p>
+<p>Append ‘<code>?test=123</code>&#39; to the URL and click on Send</p>
+<p>When you select the 3rd policy in the Transaction Map (our newly added policy), you should see the new apigee.test variable being populated.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3f74c715507eb384.png"></p>
+<p>Now, let&#39;s get back to the same policy and change its prefix to ‘private&#39;</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8c1dd9f6662117d1.png"></p>
+<p>Save the proxy, and let&#39;s test again in the trace.</p>
+<p>You should no longer see that variable present in the list since it&#39;s now been marked as a private variable.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/187888b2934a2628.png"></p>
+<p>Any variable that starts with &#34;private.&#34; will not show in the trace.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create data mask configurations for a proxy" duration="10">
+        <p>For this step, we&#39;ll be using the Apigee&#39;s Management APIs. In specific the one at:</p>
+<p><a href="https://apidocs.apigee.com/management/apis/post/organizations/%7Borg_name%7D/apis/%7Bapi_name%7D/maskconfigs" target="_blank">https://apidocs.apigee.com/management/apis/post/organizations/%7Borg_name%7D/apis/%7Bapi_name%7D/maskconfigs</a></p>
+<p>Open the link above into a new tab in your browser. We&#39;ll be invoking the API to configure our data masks directly from the documentation.</p>
+<p>Scroll down to where you see the session titled ‘Resource URL&#39;</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5844155015c1985e.png"></p>
+<p>In the URL itself, replace ‘{org_name}&#39; with the name of your organization in Apigee, for example &#34;student-eval&#34;, and ‘{api_name}&#39; with the name of the proxy we are adding masks for. In our case &#34;helloworld&#34;</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ff07a7dbf7094750.png"></p>
+<p>Scroll a bit further down to find the Request Body session. We&#39;ll modify it to block the X-Forwarded-For header in the trace:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5a46632c96799d32.png"></p>
+<pre><code>&lt;MaskDataConfiguration name=&#34;default&#34;&gt;
+  &lt;Variables&gt;
+        &lt;Variable&gt;request.header.X-Forwarded-For&lt;/Variable&gt;
+  &lt;/Variables&gt;
+&lt;/MaskDataConfiguration&gt;</code></pre>
+<p>Before you click on ‘Send this request&#39;, you&#39;ll need to enter your credentials for your organization by clicking on the button that says ‘HTTP Basic&#39;</p>
+<p class="image-container"><img style="width: 156.00px" src="img/2c35cc46b0e562bd.png"></p>
+<p>Enter your credentials and click on ‘Save&#39;. Optionally you can check the box for your browser to remember the email and password.</p>
+<p class="image-container"><img style="width: 591.00px" src="img/6cfe05711f9cec.png"></p>
+<p>Then click on ‘Send this request&#39;</p>
+<p class="image-container"><img style="width: 229.00px" src="img/125030e701b5ee56.png"></p>
+<p>Right under it, you should see the response from the API execution:</p>
+<p class="image-container"><img style="width: 594.00px" src="img/9a55637d707125e8.png"></p>
+<p>Back in the proxy, start a new trace session and send a request. Click on the first circle in the trace, and see that the X-Forwarded-For header is masked:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c38b52c00094ddb3.png"></p>
+<p>You can remove this mask by going to Delete Data Mask page: <a href="https://apidocs.apigee.com/management/apis/delete/organizations/%7Borg_name%7D/apis/%7Bapi_name%7D/maskconfigs/%7Bmaskconfig_name%7D" target="_blank">https://apidocs.apigee.com/management/apis/delete/organizations/%7Borg_name%7D/apis/%7Bapi_name%7D/maskconfigs/%7Bmaskconfig_name%7D</a></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create data masks configurations for the whole organization" duration="1">
+        <p>The same way that we can protect individual proxies, you can also create similar masks that will apply across all APIs in the organization.</p>
+<p>The same steps apply, it&#39;s just using different Management APIs:</p>
+<ul>
+<li><a href="https://apidocs.apigee.com/management/apis/post/organizations/%7Borg_name%7D/maskconfigs" target="_blank">Create Data Masks for an Organization</a></li>
+<li><a href="https://apidocs.apigee.com/management/apis/get/organizations/%7Borg_name%7D/maskconfigs/%7Bmaskconfig_name%7D" target="_blank">Get Data Masks Details for an Organization</a></li>
+<li><a href="https://apidocs.apigee.com/management/apis/delete/organizations/%7Borg_name%7D/maskconfigs/%7Bmaskconfig_name%7D" target="_blank">Delete Data Masks for an Organization</a></li>
+<li><a href="https://apidocs.apigee.com/management/apis/get/organizations/%7Borg_name%7D/maskconfigs" target="_blank">List Data Masks for an Organization</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You can now protect specific data from an API from being displayed during trace sessions.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

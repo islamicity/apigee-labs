@@ -1,0 +1,229 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Supplemental Lab 02b: Trace Tool</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-supplemental-lab-02b-trace-tool"
+                  title="Supplemental Lab 02b: Trace Tool"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>When developing new proxies you&#39;ll soon realize how important it is to be able to troubleshoot and understand what&#39;s happening in your proxy throughout all steps.</p>
+<p>In this lab we&#39;ll cover Apigee&#39;s trace tool and how to make the most out of it.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>Invoke requests from the Trace Tool</li>
+<li>Trace API requests flowing through the system in real time</li>
+<li>Different information available in the tool</li>
+<li>Filter only certain calls</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>The default ‘helloworld&#39; proxy -- download from <a href="https://api-eng-labs-snapshot-201910.storage.googleapis.com/helloworld.zip" target="_blank">here</a> and deploy it to the test environment if you don&#39;t already have it in your org</li>
+<li>Basic understanding of the trace tool: <a href="https://docs.apigee.com/api-platform/debug/using-trace-tool-0.html" target="_blank">https://docs.apigee.com/api-platform/debug/using-trace-tool-0.html</a></li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>Something is not going well during development and you want to understand what&#39;s happening.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>An overview of the Trace Tool</li>
+<li>Sending and capturing requests via the Trace Tool</li>
+<li>Inspecting variables</li>
+<li>Capturing requests sent from elsewhere</li>
+<li>Filtering specific requests </li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="An Overview of the Trace Tool" duration="5">
+        <p>Go to Develop/API Proxies</p>
+<p class="image-container"><img style="width: 218.00px" src="img/666f76726440b477.png"></p>
+<p>And select the sample proxy called ‘helloworld&#39;. It should have already been there when you created your eval account.</p>
+<p>Check that it is deployed. You should see a green circle next to the environment name, in the ‘Deployment&#39; drop down.</p>
+<p class="image-container"><img style="width: 189.00px" src="img/62a4fb77bf316530.png"></p>
+<p>If you do not see a green circle, in the same dropdown, simply click on the environment you want to deploy to:</p>
+<p class="image-container"><img style="width: 201.00px" src="img/9dd2c85cf3f0b4d2.png"></p>
+<p>Which will bring up a popup to confirm the deployment:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/20db83ef8e533d90.png"></p>
+<p>Click on ‘Deploy&#39;</p>
+<p>Now that the proxy is ready for execution, click on the ‘Trace&#39; tab:</p>
+<p class="image-container"><img style="width: 379.00px" src="img/ea65cc06d6cd2353.png"></p>
+<p>This will bring the Trace view:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7fa9bb9a4c859087.png"></p>
+<ol type="1" start="1">
+<li>The list of transactions captured</li>
+<li>The URL to send requests to </li>
+<li>Send button to invoke requests from the Trace Tool</li>
+<li>The Transaction Map shows all policies and flows evaluated during the execution</li>
+<li>Details of all variables and properties used on the specific step execution</li>
+<li>Visualization Options to show/hide details</li>
+<li>The environment in which the trace session will run</li>
+<li>Filters view to configure filtering for a trace session</li>
+</ol>
+<h2 is-upgraded><strong>Transactions</strong></h2>
+<p>All captured transactions are displayed as a stack, with the most recent ones at the top. You will see here the response code for each transaction as well as the time from receiving the request to sending the response back to the client (Elapsed time).</p>
+<p class="image-container"><img style="width: 293.00px" src="img/24645dd925e602ec.png"></p>
+<p>You need to select a specific transaction in this list in order to see more details for it.</p>
+<h2 is-upgraded><strong>URL </strong></h2>
+<p>You can actually invoke any URL from here and you will see the response code next to the Send button. In reality it only makes sense to invoke a URL to the proxy you are currently tracing so you can view the details.</p>
+<h2 is-upgraded><strong>Send button</strong></h2>
+<p>Will trigger a new request to the URL configured in the URL box. The response code will be displayed next to the button when the request is sent this way.</p>
+<p class="image-container"><img style="width: 117.00px" src="img/73a1c509250681b5.png"></p>
+<h2 is-upgraded><strong>Transaction Map</strong></h2>
+<p>The transaction map is where you will see all policies processed in a specific API transaction.</p>
+<p>You can select individual items in the view, or hover the mouse over to see more information.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/73fed76947d1cc8d.png"></p>
+<ul>
+<li>Policies are displayed as icons. You can select a policy to see more details at that specific step of the execution</li>
+<li>Policies can have different symbols on them to indicate a change in the default behavior:</li>
+<li><img style="width: 41.00px" src="img/94ec7a3cd7fea2cf.png"> policy skipped/not executed (typically associated with a condition applied to the policy)</li>
+<li><img style="width: 40.00px" src="img/98793c6d49f4931d.png">error generated by this policy</li>
+<li><img style="width: 37.00px" src="img/ad52e1af69efd4b5.png">policy is disabled</li>
+<li>Flows are represented by the vertical bars <img style="width: 36.00px" src="img/d79c4c7d39d69836.png">. The diamond with either an F or T inside <img style="width: 27.00px" src="img/439050b3dd0d4a5c.png"> represents evaluated flow conditions. The F is for FALSE, meaning the condition associated with the flow, evaluated to FALSE, and the T, for TRUE, for when the condition is TRUE.</li>
+<li>The message at certain key moments can be inspected by selecting one of the four circles <img style="width: 44.00px" src="img/c1c37553e5c1db3b.png"></li>
+</ul>
+<ol type="1" start="1">
+<li>request as received from the client</li>
+<li>request as being sent to the target</li>
+<li>response as received from the target</li>
+<li>response as sent to the client</li>
+</ol>
+<ul>
+<li><img style="width: 50.00px" src="img/e514d397634d33f6.png">symbol for the backend being invoked</li>
+<li>Step Navigation buttons (prev/next) help you investigate a request step by step. You can also select any symbol in the transaction map to skip ahead or back to a specific point.<br></li>
+</ul>
+<h2 is-upgraded><strong>Phase Details</strong></h2>
+<p>The details or any step are visualized at the bottom panel in 3 columns:</p>
+<ul>
+<li>variable/property name</li>
+<li>Values before the policy executed</li>
+<li>Values after the policy executed</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/4c84738a83c4c08b.png"></p>
+<p>As you select another policy or portion in the transaction map, the details will be updated to reflect what was happening at that exact moment.</p>
+<p class="image-container"><img style="width: 624.79px" src="img/6367aa961eb6db9e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Sending and capturing requests via the Trace Tool" duration="5">
+        <p>In the helloworld proxy, in the trace tab, check the environment selected.</p>
+<p>Make sure you are tracing the test environment:</p>
+<p class="image-container"><img style="width: 328.50px" src="img/9022b549f14a7f16.png"></p>
+<p>Click on the ‘Start Trace Session&#39; button.</p>
+<p class="image-container"><img style="width: 174.50px" src="img/eadc6801d1f21655.png"></p>
+<p>It should turn red and display a countdown timer</p>
+<p class="image-container"><img style="width: 308.50px" src="img/9e32d7cf4ef58b16.png"></p>
+<p>The trace runs for up to 10 minutes or 20 requests captured, whichever comes first.</p>
+<p>Check the URL to make sure it seems ok (it should point to the proxy you are tracing) and click on the ‘Send&#39; button. You should see the Status code displayed next to the button.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7e42c5c769acd9e.png"></p>
+<p>You should also see the Transaction Map and Details get populated. We&#39;ll cover these in a bit.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Inspecting Variables" duration="0">
+        <p>Just as the previous step, make a few requests in a row, until you get a response code of 429.</p>
+<p class="image-container"><img style="width: 324.44px" src="img/4d987bbba57fb127.png"></p>
+<p>Select one of the transactions with the 429 and then click on the Quota policy</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e19eb770f273179d.png"></p>
+<p>In the details panel, </p>
+<p class="image-container"><img style="width: 624.00px" src="img/4e162213876ecc68.png"></p>
+<p>Scroll down looking for a property called ‘ratelimit.check-quota.available.count&#39;. For this request it should show 0</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9b539e472f8b702d.png"></p>
+<p>Click on other transactions and look for the same variable. Also note how the icon for the policy is displayed differently when the available count is still greater than 0.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Capturing requests sent from elsewhere" duration="5">
+        <p>The same way that we can capture transactions sent from the trace, we can also capture all transactions to the proxy, independent from where they are made from.</p>
+<p>Make sure you stop your trace if it is still going from before and start it again to have a fresh session.</p>
+<p>Do not send requests from the tool itself and instead, copy the URL into a new tab in your browser.</p>
+<p>You should see something like:</p>
+<p class="image-container"><img style="width: 187.00px" src="img/87ccd84b7fa00b08.png"></p>
+<p>If you switch to the Apigee Trace Tool tab again, you should now see a GET request to the API</p>
+<p class="image-container"><img style="width: 286.00px" src="img/310196c09c536bc8.png"></p>
+<p>Since the request was sent from a browser, select the transaction and look for the User-Agent header (the value will be different depending on your browser and version):</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b962e3d15b48750a.png"> </p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Filtering specific requests" duration="5">
+        <p>The filter tool offers some basic filtering to allow you to capture certain requests coming in to the proxy.</p>
+<p>To access the filter options, click on the ‘Filters&#39; vertical bar:</p>
+<p class="image-container"><img style="width: 60.00px" src="img/b3b651830c12906b.png"></p>
+<p>That will bring the filters view</p>
+<p class="image-container"><img style="width: 199.50px" src="img/f094401ce96f85b8.png"></p>
+<p>You have the option to filter by query parameters or headers.</p>
+<p>For the filters to be in effect, they need to be set and then the trace needs to be started. You cannot modify the filters for an ongoing trace capture session.</p>
+<h2 is-upgraded><strong>Add a filter for a query parameter</strong></h2>
+<p>In the filters view, add an entry for a new query parameter called ‘test&#39; with a value of ‘123&#39;</p>
+<p class="image-container"><img style="width: 251.00px" src="img/493d68dcacef9014.png"></p>
+<p>Make sure you have the right environment selected and start the trace session.</p>
+<p>From the trace tool, send a few requests as before, without changing the url. Nothing should show up as captured.</p>
+<p>Now, append to the URL, the query parameter with the value as we configured in the filter and click on ‘Send&#39;:</p>
+<pre><code>/v0/hello?test=123</code></pre>
+<p class="image-container"><img style="width: 304.00px" src="img/5c3c6a34623e1775.png"></p>
+<p>It should now show up in the transactions:</p>
+<p class="image-container"><img style="width: 289.00px" src="img/dde8d5b17b34eeb5.png"></p>
+<p>The same would be true if you filter by header, but the requests would have to be sent from outside the trace tool, as you cannot configure headers for the requests sent from the tool.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Saving trace sessions for future use" duration="5">
+        <p>The trace tool allows you to download a trace session and save it for future investigation. It can be opened by anyone in any org.</p>
+<p>Click on the &#39;Download Trace Session&#39; button to download a trace XML file.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/670a4ad6d1080ab3.png"></p>
+<p>Go to Offline Trace.</p>
+<p class="image-container"><img style="width: 246.00px" src="img/bcab182afb3c3e88.png"></p>
+<p>Click on one of the &#39;Choose File&#39; buttons, and upload the trace file you downloaded.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/fa20ffb402d075aa.png"></p>
+<p>You can explore all of the transactions in the session and see all of the same information you had when the session was alive.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7cdc326045370c5e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You now can use the trace tool to capture requests sent to your proxy.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

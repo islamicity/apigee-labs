@@ -1,0 +1,191 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Lab 02: Target Servers</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-lab-02-target-server"
+                  title="Lab 02: Target Servers"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>When building proxies that point to other services in the backend, it is important to separate the code portion from the configurations and not hardcode any URLs or other details specific to the backend service. Services will usually have different instances in different places for different environments or stages of the development cycle (dev, test, staging, etc). It is important that when promoting your proxy, you do not rely on code changes to be able to push the proxy code to the next environment/stage.</p>
+<p>In this lab we will focus on the URL configuration for our target service.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to separate configuration from code</li>
+<li>Create a named target server for each environment</li>
+<li>Modify your existing proxy to point to a pre configured target server</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Your proxy created in the previous lab.</li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>The proxy you created needs to be promoted across different environments and point to their backend systems at each stage of the development cycle.</p>
+<p>The proxy previously created has a hard-coded URL as the target configuration and that must change.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="SKIP (unless your current proxy is broken)" duration="0">
+        <aside class="warning"><p><strong>Important</strong>: This section should only be used if you were unable to complete the last lab and your proxy is not at a good starting point.</p>
+</aside>
+<p>Download a working solution to the previous lab as a proxy bundle ZIP file:</p>
+
+<p><a href="https://api-eng-labs-snapshot-201910.storage.googleapis.com/retail-v1-lab01.zip" target="_blank"><paper-button class="colored" raised><iron-icon icon="cloud_download"></iron-icon>Download Lab 01 Bundle</paper-button></a></p>
+<p>Find your spec ID. When you open your spec in the spec editor, the link will be in this format, with the spec ID at the end of the URL:</p>
+<pre>https://apigee.com/organizations/YOURORG/specs/folder/FOLDERID/editor/YOURSPECID</pre>
+<p>Navigate to your proxy and upload the bundle as a new revision:</p>
+<p class="image-container"><img style="width: 190.00px" src="https://lh5.googleusercontent.com/U7eHM38KSVuHmVqm58-GOV1BNkyBkzUaa7jYtEm15a0HU8cCU9UTGPyUv1bIbVAvSGxUHhUTF7tn9e_Mnm5ok9tMNmbCCn20vwS5uCXTS7pt_aNl6lZgFqvcC4ADsC7zb_XdV8H-"></p>
+<p><br>Select the association.json resource. Replace YOURORG and YOURSPECID with the values from the spec URL.</p>
+<p class="image-container"><img style="width: 624.00px" src="https://lh5.googleusercontent.com/ctOmzbmP_57QYyXSHNaMm02rgpaDsZx6MV0ov43mq_P0g21JGZL1YRrtjLOA7bYHjga_CYyTTmW3oNfAFhkLS2Si0AGeFwbHFZ4IjIspYzEOffGKB3x8cC1q2n6nhqhpdzTSnzhk"></p>
+<p>Once updated, the association.json should look something like this:</p>
+<pre>{
+        &#34;url&#34;: &#34;/organizations/apigeek-eval/specs/doc/207966/content&#34;
+}</pre>
+<p>Click Save to save your proxy. Open the Deployment menu, and check the deployment status. Click on test to deploy this revision of the proxy.</p>
+<p class="image-container"><img style="width: 610.00px" src="https://lh6.googleusercontent.com/gCwM-0EwiOOuVyFAOT_iedp3lDt0oMYZ0WohqVRZFY2UqXVdbYVErNH7AAAvXHcY2TX9KDwwfNrTkrAoeMMykOlRZAUGsV9oK_oOZbClP-9q8FBWqSZNvlDGWJuxuMAJZxJrABth"></p>
+<p>Test will be green when it is deployed.</p>
+<p class="image-container"><img style="width: 173.00px" src="https://lh5.googleusercontent.com/si6k0W9lOHNqymFdUCNBb3ljb3GF4F41StR3Cm7g3e9b5J1Zsi56WHgQQB3bGctAsCJWYVFKCxrPf57OAwpi8-zf3FRc6hGpo8yDNjsSaNYAwp6eOATSBCknxi-DeYbtctEZzqQV"></p>
+
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Configure a new Target Server</li>
+<li>Update the API proxy to use the target server </li>
+<li>Test your changes</li>
+<li>Optional - repeat for all environments with different configurations</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure a new Target Server" duration="5">
+        <p>Log into your Apigee org.</p>
+<p>Click on Admin, and then click on Environments and select Target Servers:</p>
+<p class="image-container"><img style="width: 246.00px" src="img/fffcf76f9d05a04c.png"></p>
+<p>Make sure you select the correct Environment to make the changes:</p>
+<p class="image-container"><img style="width: 420.00px" src="img/2b3493f221747023.png"></p>
+<p>For now, let&#39;s use ‘test&#39;:</p>
+<p class="image-container"><img style="width: 410.00px" src="img/11d85da1350e8a7c.png"></p>
+<p>Create a new target server by clicking on +Target server button on the upper right corner (you may have to scroll depending on your screen resolution):</p>
+<p class="image-container"><img style="width: 219.00px" src="img/1f19985d718eaa57.png"></p>
+<p>A new popup screen will appear for you to fill in the details of your target server:</p>
+<p class="image-container"><img style="width: 438.00px" src="img/5bc3217073f9883a.png"></p>
+<p>Enter the configurations to be used for the server:</p>
+<p>Name</p>
+<pre>TS-Retail</pre>
+<p>Host</p>
+<pre>gcp-cs-training-01-test.apigee.net</pre>
+<p>Port</p>
+<pre>443</pre>
+<p>Confirm that the Enabled and SSL boxes are checked. Checking the SSL box will show some other configuration fields:</p>
+<p class="image-container"><img style="width: 437.00px" src="img/9ff7e3be87483fcf.png"></p>
+<p>We can leave all of these defaulted for now. Click on Add.</p>
+<p>You should then see your newly created Target Server listed as below:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f9023acf5fc738ee.png"></p>
+<p>Double check your server configurations before continuing.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Update the API proxy to use the Target Server" duration="5">
+        <p>Now let&#39;s go back into our API proxy. Click on Develop and then click on API Proxies. </p>
+<p class="image-container"><img style="width: 253.00px" src="img/8bc20da0d032426a.png"></p>
+<p>Now click on the proxy name to view its configurations, followed by a click to the Develop tab:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f4ea123d397e2d71.png"></p>
+<p>Whenever we save changes to a proxy, it will overwrite the current revision. To make sure we can go back to our previous version if we want to, let&#39;s save as a new revision.</p>
+<p class="image-container"><img style="width: 150.00px" src="https://lh5.googleusercontent.com/ZaKEA-GE4Fe2hSLKruFkXoItRa1IHm-MaPdiK8024jV2e7u0MxrF88JV_1imdIR-LoGCXXXBOTIIV-3VVd6L5BMa8V9_Q3osi6g4_Z90xrtn2wh_2idfLdVVt6kWNpNEJ0dfz7ip"></p>
+<p>Then we&#39;ll need to deploy this version to test. Click the Deployment menu, and then select the test environment. It will be green when the selected revision is deployed.</p>
+<p class="image-container"><img style="width: 168.00px" src="https://lh4.googleusercontent.com/UoGrTYUeFoW3zH7n9V6zUfU87WzCzG2D8AUzLVUTrnOoUuJnQzzCziQpbcAB5xhpkq5nq_72MJJoYXTT-NxdLnQmq_Iafpr1D6vLdbM-2zdRFO-FdW-2tIGI3V5gB-awtr-47Y9M"></p>
+
+<p>Look for the <strong>Target Endpoint</strong> configurations and select ‘default&#39;:</p>
+<p class="image-container"><img style="width: 280.00px" src="img/4b31ae074f1634db.png"></p>
+<p>You should see on the bottom mid panel, the XML configuration for the default Target Endpoint:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9217b267a6819ccd.png"></p>
+<p>On line 16 (it may be different in your proxy), you&#39;ll find the backend URL hardcoded in the proxy code itself.</p>
+<p>In order to remove the hardcoded URL, we need to change it to point to the Target Server we configured in the previous step, by replacing the URL element with the following:</p>
+<pre><code>        &lt;LoadBalancer&gt;
+            &lt;Server name=&#34;TS-Retail&#34;/&gt;
+        &lt;/LoadBalancer&gt;
+        &lt;Path&gt;/training/db&lt;/Path&gt;</code></pre>
+<p>Your final configuration should look like:</p>
+<p class="image-container"><img style="width: 614.00px" src="img/741f72b78697e3fb.png"></p>
+<p>Please note that the Path information is still set in the proxy itself, allowing the same target server to host multiple services.</p>
+<p>You must click on the Save button in order for your proxy to get updated and redeployed.</p>
+<p class="image-container"><img style="width: 361.00px" src="img/5862608f4ec38146.png"></p>
+<p>If for any reason you save as a new revision, you will have to make sure you are deploying and testing on the correct revision.</p>
+<p>The UI will show you which revision is deployed currently and to which environment:</p>
+<p class="image-container"><img style="width: 219.00px" src="img/67f0d93a0c88fc3.png"></p>
+<p>To deploy a specific revision, select it on the revision drop down and then on the deployment drop down, click on the environment to deploy it to:</p>
+<p class="image-container"><img style="width: 614.00px" src="img/498e8def246e21ac.png"></p>
+<p>After deployment, you should see a green dot next to the environment you selected:</p>
+<p class="image-container"><img style="width: 619.00px" src="img/a9bd1305ea1700ea.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test your changes" duration="5">
+        <p>Testing will be done the exact same way as in the previous lab. Send a <strong>GET</strong> request to your proxy with the appended <strong>/categories</strong> to the URL. You should still be getting a <strong>200 OK </strong>response with the exact same payload as you did before changing the proxy to use a target server.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2decdc3735d823e1.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/35b56ebe6b843f35.png"></p>
+<p>Note that the Send Requests box is just an easy way to create a GET request for your proxy. However, you cannot add headers to or change the verb for the request. All traffic traveling through your proxy is traced, though, when trace is turned on. Therefore, you can make requests via any REST API tool, such as <a href="https://curl.haxx.se/" target="_blank">curl</a>, <a href="https://httpie.org/" target="_blank">httpie</a>, or <a href="https://www.getpostman.com/" target="_blank">Postman</a> and visualize them in the trace tool.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Optional - Repeat step 1 for production" duration="5">
+        <p>Typically your test and prod backends will be different.</p>
+<p>Create a new Target Server, but this time under the prod environment with the following details:</p>
+<p>Name (must be the same)</p>
+<pre>TS-Retail</pre>
+<p>Host (this is now the prod host)</p>
+<pre>gcp-cs-training-01-prod.apigee.net</pre>
+<p>Port</p>
+<pre>443</pre>
+<p>Click on Add.</p>
+<aside class="special"><p>Note that the target server name must be the same across all environments for the promotion of the proxy to work properly. The name is how we reference the configs from the proxy&#39;s code.</p>
+</aside>
+<p>Deploy your proxy to prod and test it!</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You have separated your backend configurations from your proxy code and you are now able to promote your proxy to different environments with no need to update the code.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

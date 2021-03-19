@@ -1,0 +1,147 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Supplemental Lab 05a: Regex Threat Protection</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-supplemental-lab-05a-regex-threat-protection"
+                  title="Supplemental Lab 05a: Regex Threat Protection"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>In this lab you&#39;ll learn how to detect potential threats to your API by using regular expressions to inspect and detect problems as soon as the request is received.</p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to use the Regular Expression Protection Policy</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Basic knowledge of regular expressions</li>
+<li>An account with Apigee. Create one at <a href="https://login.apigee.com" target="_blank">https://login.apigee.com</a> if needed</li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>Your APIs receive data from applications you do not control, and your API could be subject to attacks based on content, such as SQL injection.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Create a new basic API proxy</li>
+<li>Add the Regular Expression Protection Policy</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a new API Proxy" duration="5">
+        <p>Go to Develop/API Proxies</p>
+<p class="image-container"><img style="width: 223.00px" src="img/d3f6e8a18200f44c.png"></p>
+<p>Click on + Proxy</p>
+<p class="image-container"><img style="width: 110.00px" src="img/668aa91fcbefb9cd.png"></p>
+<p>Select ‘Reverse Proxy&#39; and click on ‘Next&#39;:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5b8edc6cd305ca66.png"></p>
+<p>Enter the proxy details:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Proxy Name</p>
+</td><td colspan="1" rowspan="1"><p>lab5a-v1</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Proxy Base Path</p>
+</td><td colspan="1" rowspan="1"><p>/lab5a/v1</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Existing API</p>
+</td><td colspan="1" rowspan="1"><p>https://mocktarget.apigee.net</p>
+</td></tr>
+</table>
+<p class="image-container"><img style="width: 624.00px" src="img/d79b93e6239b2b32.png"></p>
+<p>Select ‘Pass through (none)&#39; for Authorization:</p>
+<p class="image-container"><img style="width: 406.00px" src="img/6720eb3f5f98f9ef.png"></p>
+<p>For Virtual Hosts, deselect default and make sure only ‘secure&#39; is checked:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f41db0fdd8a08c72.png"></p>
+<p>As a best practice, all APIs should flow over a secure connection only.</p>
+<p>Double check your configs and click on ‘Build and Deploy&#39;</p>
+<p class="image-container"><img style="width: 533.00px" src="img/d975c2c98579f657.png"></p>
+<p class="image-container"><img style="width: 207.00px" src="img/b967949021f02f8d.png"></p>
+<p>After the proxy is built and deployed, view the proxy in the editor. You can invoke the API in the ‘Trace&#39; tab, by starting a trace session and clicking on ‘Send&#39;. The transactions will be captured with the details in the trace session.</p>
+<p>If you add a query parameter to the URL it&#39;ll be passed as is to our mock target. There&#39;s no harm being done here, but such a scenario in production, if your backend service is not protected could be catastrophic.</p>
+<p>Add the following to the URL and click on ‘Send&#39; again</p>
+<p>?query=delete</p>
+<p>It should go through for now. But in reality, this is a scenario that we may want to block.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add the Regular Expression Protection Policy" duration="5">
+        <p>Details for this policy can be found here: <a href="https://docs.apigee.com/api-platform/reference/policies/regular-expression-protection" target="_blank">https://docs.apigee.com/api-platform/reference/policies/regular-expression-protection</a></p>
+<p>Click on the ‘Develop&#39; tab</p>
+<p class="image-container"><img style="width: 303.00px" src="img/9fff1715d0fecd34.png"></p>
+<p>Select the ‘PreFlow&#39; in the ‘Proxy Endpoints&#39;</p>
+<p class="image-container"><img style="width: 262.00px" src="img/2b406e2d6d55980e.png"></p>
+<p>In the flow view, click on ‘+ Step&#39; on the Request side</p>
+<p class="image-container"><img style="width: 352.00px" src="img/a89ea6c2851b121a.png"></p>
+<p>Select the Regular Expression Protection policy, and name it:</p>
+<pre>REP-SQLInjection</pre>
+<p>Click Add.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/73c3ea29e3b9404e.png"></p>
+<p>Use this policy configuration:</p>
+<pre><code>&lt;RegularExpressionProtection async=&#34;false&#34; continueOnError=&#34;false&#34; enabled=&#34;true&#34; name=&#34;REP-SQLInjection&#34;&gt;
+    &lt;IgnoreUnresolvedVariables&gt;false&lt;/IgnoreUnresolvedVariables&gt;
+    &lt;QueryParam name=&#34;query&#34;&gt;
+        &lt;Pattern&gt;[\s]*(?i)((delete)|(exec)|(drop\s*table)|(insert)|(shutdown)|(update)|(\bor\b))&lt;/Pattern&gt;
+    &lt;/QueryParam&gt;
+    &lt;Source&gt;request&lt;/Source&gt;
+&lt;/RegularExpressionProtection&gt;</code></pre>
+<p>The pattern searches for dangerous patterns for a SQL query. Make sure your proxy is saved and deployed, and go back to the trace tab.</p>
+<p>With a trace session running, try the same previous request with the query parameter. You should get a 500 as response now, as the string &#34;delete&#34; matches the pattern you configured for the policy.</p>
+<p class="image-container"><img style="width: 292.00px" src="img/349908b84450619a.png"></p>
+<p>And in the policies, you should see that the error was generated by the RegEx policy</p>
+<p class="image-container"><img style="width: 213.00px" src="img/6a576e26f6eedbe6.png"></p>
+<p>With the following default response being sent:</p>
+<pre><code>{
+  &#34;fault&#34;:{
+    &#34;faultstring&#34;:&#34;Regular Expression Threat Detected in REP-SQLInjection: regex: [\\s]*(?i)((delete)|(exec)|(drop\\s*table)|(insert)|(shutdown)|(update)|(\\bor\\b)) input: delete&#34;,
+    &#34;detail&#34;:{
+      &#34;errorcode&#34;:&#34;steps.regexprotection.ThreatDetected&#34;
+    }
+  }
+}</code></pre>
+<aside class="warning"><p>Note: The default status code returned by the RegularExpressionProtection policy is 500, indicating Server Error. This should really be 400 Bad Request. In your proxies you should rewrite the error to return the correct status code.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You have successfully caught and handled a potential attack to your API.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-08T17:22:53Z",
+  "id": "apigee-api-engineer-lab-10-fault-handling",
+  "duration": 15,
+  "title": "Lab 10: Fault Handling",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to handle errors",
+  "source": "1ibfRXleSCgnf4KZr6AZSzCd19nwMdNIYBz4HoVCs-pc",
+  "theme": "day-2",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Day 2"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-lab-10-fault-handling"
+}

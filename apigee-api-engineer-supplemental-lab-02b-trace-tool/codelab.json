@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-10T23:13:48Z",
+  "id": "apigee-api-engineer-supplemental-lab-02b-trace-tool",
+  "duration": 25,
+  "title": "Supplemental Lab 02b: Trace Tool",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to use the integrated trace tool and its features",
+  "source": "1-X4Lq9VqhhEn-rLXOQBKh6z7AEyrMStXbQnGh0Mx9gg",
+  "theme": "supplemental",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Supplemental"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-supplemental-lab-02b-trace-tool"
+}

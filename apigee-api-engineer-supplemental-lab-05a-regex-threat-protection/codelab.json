@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-10T23:42:22Z",
+  "id": "apigee-api-engineer-supplemental-lab-05a-regex-threat-protection",
+  "duration": 10,
+  "title": "Supplemental Lab 05a: Regex Threat Protection",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to protect your API against content attacks.",
+  "source": "1OYHARtJ2VaQb_7GpSw116QhTG4C1lZfY7hd-he2Nr1c",
+  "theme": "supplemental",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Supplemental"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-supplemental-lab-05a-regex-threat-protection"
+}

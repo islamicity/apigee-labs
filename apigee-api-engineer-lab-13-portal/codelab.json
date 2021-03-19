@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-09T18:28:55Z",
+  "id": "apigee-api-engineer-lab-13-portal",
+  "duration": 20,
+  "title": "Lab 13: Developer Portal",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to publish APIs to the developer portal.",
+  "source": "1M4vcMyaUjjjYkm4-YA0L1f3JzYfxWtGN6YXizdcPDX0",
+  "theme": "day-3",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Day 3"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-lab-13-portal"
+}

@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-08T17:40:17Z",
+  "id": "apigee-api-engineer-lab-06-internal-threat",
+  "duration": 10,
+  "title": "Lab 06: Internal Threat Protection",
+  "authors": "rdeandrade",
+  "summary": "In this lab, you'll learn how to protect against internal threats",
+  "source": "1272Bq9NvEw8DpMtgZMkJIM8nhyYO0xl5_hs1_X5MGAI",
+  "theme": "day-2",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Day 2"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/apigeekdemos/api-eng-training-resources/issues",
+  "url": "apigee-api-engineer-lab-06-internal-threat"
+}

@@ -1,0 +1,234 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Lab 03: Products, Developers and Apps</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="apigee-api-engineer-lab-03-products"
+                  title="Lab 03: Products, Developers and Apps"
+                  environment="web"
+                  feedback-link="https://github.com/apigeekdemos/api-eng-training-resources/issues">
+    
+      <google-codelab-step label="Overview" duration="0">
+        <p>All successful API programs allow many different API clients to consume their APIs. It is extremely important to identify who is calling. In Apigee, APIs are published in the form of <strong>products</strong> and consumed by <strong>applications</strong>. </p>
+<h2 class="checklist" is-upgraded><strong>What you&#39;ll learn</strong></h2>
+<ul class="checklist">
+<li>How to identify who&#39;s calling the API</li>
+<li>How to configure a product for our API </li>
+<li>How to create an application to consume the API</li>
+</ul>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>Your proxy created in the previous lab</li>
+</ul>
+<h2 is-upgraded><strong>Use case</strong></h2>
+<p>You want your API to be consumed by many different clients and you want to identify who is calling the API.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="SKIP (unless your current proxy is broken)" duration="0">
+        <aside class="warning"><p><strong>Important</strong>: This section should only be used if you were unable to complete the last lab and your proxy is not at a good starting point.</p>
+</aside>
+<p>Download a working solution to the previous lab as a proxy bundle ZIP file:</p>
+
+<p><a href="https://api-eng-labs-snapshot-201910.storage.googleapis.com/retail-v1-lab02.zip" target="_blank"><paper-button class="colored" raised><iron-icon icon="cloud_download"></iron-icon>Download Lab 02 Bundle</paper-button></a></p>
+<p>Prerequisites:</p>
+<ul>
+<li>Target Server: TS-Retail (instructions in lab 2)</li>
+</ul>
+
+<p>Find your spec ID. When you open your spec in the spec editor, the link will be in this format, with the spec ID at the end of the URL:</p>
+<pre>https://apigee.com/organizations/YOURORG/specs/folder/FOLDERID/editor/YOURSPECID</pre>
+<p>Navigate to your proxy and upload the bundle as a new revision:</p>
+<p class="image-container"><img style="width: 190.00px" src="https://lh5.googleusercontent.com/U7eHM38KSVuHmVqm58-GOV1BNkyBkzUaa7jYtEm15a0HU8cCU9UTGPyUv1bIbVAvSGxUHhUTF7tn9e_Mnm5ok9tMNmbCCn20vwS5uCXTS7pt_aNl6lZgFqvcC4ADsC7zb_XdV8H-"></p>
+<p><br>Select the association.json resource. Replace YOURORG and YOURSPECID with the values from the spec URL.</p>
+<p class="image-container"><img style="width: 624.00px" src="https://lh5.googleusercontent.com/ctOmzbmP_57QYyXSHNaMm02rgpaDsZx6MV0ov43mq_P0g21JGZL1YRrtjLOA7bYHjga_CYyTTmW3oNfAFhkLS2Si0AGeFwbHFZ4IjIspYzEOffGKB3x8cC1q2n6nhqhpdzTSnzhk"></p>
+<p>Once updated, the association.json should look something like this:</p>
+<pre>{
+        &#34;url&#34;: &#34;/organizations/apigeek-eval/specs/doc/207966/content&#34;
+}</pre>
+<p>Click Save to save your proxy. Open the Deployment menu, and check the deployment status. Click on test to deploy this revision of the proxy.</p>
+<p class="image-container"><img style="width: 610.00px" src="https://lh6.googleusercontent.com/gCwM-0EwiOOuVyFAOT_iedp3lDt0oMYZ0WohqVRZFY2UqXVdbYVErNH7AAAvXHcY2TX9KDwwfNrTkrAoeMMykOlRZAUGsV9oK_oOZbClP-9q8FBWqSZNvlDGWJuxuMAJZxJrABth"></p>
+<p>Test will be green when it is deployed.</p>
+<p class="image-container"><img style="width: 173.00px" src="https://lh5.googleusercontent.com/si6k0W9lOHNqymFdUCNBb3ljb3GF4F41StR3Cm7g3e9b5J1Zsi56WHgQQB3bGctAsCJWYVFKCxrPf57OAwpi8-zf3FRc6hGpo8yDNjsSaNYAwp6eOATSBCknxi-DeYbtctEZzqQV"></p>
+
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Lab Steps" duration="0">
+        <ol type="1" start="1">
+<li>Add a VerifyAPIKey policy to your proxy</li>
+<li>Create a Product with your proxy</li>
+<li>Create a Developer</li>
+<li>Create an Application</li>
+<li>Test your API with the newly created API key </li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a VerifyAPIKey policy to your proxy" duration="5">
+        <p>Whenever we save changes to a proxy, it will overwrite the current revision. To make sure we can go back to our previous version if we want to, let&#39;s save as a new revision.</p>
+<p class="image-container"><img style="width: 150.00px" src="https://lh5.googleusercontent.com/ZaKEA-GE4Fe2hSLKruFkXoItRa1IHm-MaPdiK8024jV2e7u0MxrF88JV_1imdIR-LoGCXXXBOTIIV-3VVd6L5BMa8V9_Q3osi6g4_Z90xrtn2wh_2idfLdVVt6kWNpNEJ0dfz7ip"></p>
+<p>Then we&#39;ll need to deploy this version to test. Click the Deployment menu, and then select the test environment. It will be green when the selected revision is deployed.</p>
+<p class="image-container"><img style="width: 168.00px" src="https://lh4.googleusercontent.com/UoGrTYUeFoW3zH7n9V6zUfU87WzCzG2D8AUzLVUTrnOoUuJnQzzCziQpbcAB5xhpkq5nq_72MJJoYXTT-NxdLnQmq_Iafpr1D6vLdbM-2zdRFO-FdW-2tIGI3V5gB-awtr-47Y9M"></p>
+
+<p>Go back into our API proxy. </p>
+<p>Select the default Proxy Endpoint and click on PreFlow. </p>
+<p class="image-container"><img style="width: 261.00px" src="img/8dfbd6930f39d92c.png"></p>
+<p>You should see the graphic representation of its policies (empty for now):</p>
+<p class="image-container"><img style="width: 615.00px" src="img/855b60ff61cd6a49.png"></p>
+<p>To add a policy to the Request PreFlow, click on the &#34;+ Step&#34; button on the upper right corner of the flow view. You will be presented with a list of available policies to be added to the flow:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/74d30613e87457f9.png"></p>
+<p>Select &#34;Verify API Key&#34;.</p>
+<p>Change the Display Name to:</p>
+<pre>VAK-VerifyKey</pre>
+<aside class="special"><p>We&#39;ll be using a prefix for our policy names that indicates the type of policy being used. This is a helpful naming convention because the flow XML does not show policy types. &#34;VAK&#34; stands for Verify API Key.</p>
+</aside>
+<p>The name will automatically be set when changing the display name. Click on Add.</p>
+<p>Next, we need to configure the policy to take the API key as a parameter from a custom header.</p>
+<p>We&#39;ll be using the header name:</p>
+<pre><code>apikey</code></pre>
+<p>Click on the policy and you should see the current configuration:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e79ee8957cbfdcc6.png"></p>
+<p>By default, the policy comes configured to look for the key in a query parameter. For this lab it should be enough, given that this is not a production application. But why leave it as is when the best practice is to never place sensitive data, such as an API key, in the URL?</p>
+<p>In order to receive the key in a header we need to modify the &lt;APIKey&gt; element to the following:</p>
+<pre><code>    &lt;APIKey ref=&#34;request.header.apikey&#34;/&gt;</code></pre>
+<p>Make sure you save your proxy and that you have deployed the correct revision.</p>
+<p>Switch to the trace tab and let&#39;s verify we are receiving the key in the right location.</p>
+<p>If you simply invoke the API from the trace itself, you should be receiving a 401 as response.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3d34b4c685af517a.png"></p>
+<p>We cannot add headers from the trace tool.</p>
+<p>We can invoke the API from elsewhere while still tracing the proxy using the trace tool. For the purpose of this lab, I&#39;ll be showing how to do it from the Apigee&#39;s REST client tool available at: <a href="https://apigee-restclient.appspot.com/" target="_blank">https://apigee-restclient.appspot.com/</a>, but you can use Postman, cURL, or other tools if you want.</p>
+<p>For now, just to validate our policy configuration, let&#39;s set the header apikey to something like ‘test123&#39;:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/db0546304e2110dd.png"></p>
+<p>When you invoke the API you should still be getting a 401, but this time it should say that the key is invalid.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b6bea1ae80015ce5.png"></p>
+<p>As long as you can see the value passed in the trace, we are OK to continue.</p>
+<p class="image-container"><img style="width: 538.00px" src="img/3fd85426bf32ff0c.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a Product with your proxy" duration="5">
+        <p>In order to create a key we can use for the API, we&#39;ll first need to create a product. </p>
+<p>We&#39;ll switch to the Publish section in the UI and then select API Products.</p>
+<p class="image-container"><img style="width: 245.00px" src="img/f6661c4c92c066c8.png"></p>
+<p>If you have a brand new org, you won&#39;t see much here; otherwise you&#39;ll see a list of products already created.</p>
+<p>Look for the ‘+ API Product&#39; button on the upper right corner and click on it.</p>
+<p class="image-container"><img style="width: 140.00px" src="img/e248feaaed8ecb40.png"></p>
+<p>This will bring you to a new popup screen where you&#39;ll enter the details about the product being created as well as which APIs should be part of this product.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9ae9c9a6cdaa6fe6.png"></p>
+<p>Fill in the following information (make sure you leave the ‘Automatically approve...&#39; option checked). </p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Name</p>
+</td><td colspan="1" rowspan="1"><p>Retail</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Display Name</p>
+</td><td colspan="1" rowspan="1"><p>Retail</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Description</p>
+</td><td colspan="1" rowspan="1"><p>APIs to enable retail use cases</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Access</p>
+</td><td colspan="1" rowspan="1"><p>Public</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Environment</p>
+</td><td colspan="1" rowspan="1"><p>test</p>
+</td></tr>
+</table>
+<p>Move down to the API Resources area and look for the API Proxies field and click the link for ‘Add a proxy&#39;</p>
+<p class="image-container"><img style="width: 448.00px" src="img/2069a6526092748d.png"></p>
+<p>We&#39;ll be adding the complete proxy, select it from the list and click on ‘Add (1)&#39;</p>
+<p class="image-container"><img style="width: 490.00px" src="img/9a90075a9487c081.png"></p>
+<p>It&#39;ll bring you back to the previous screen. You should see that adding this API product allows access to /retail/v1/ paths.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c07fe30e9fddafc1.png"></p>
+<p>Click on ‘Save&#39; on the upper right corner.</p>
+<p>When you go back to the API Products list, you should now see your newly created product. We can now create a developer application to use it.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a Developer" duration="5">
+        <p>Developers are usually created via the Developer Portal, but we don&#39;t have one created yet. Instead we&#39;ll add a developer using the management UI.</p>
+<p>Under the Publish menu, select Developers:</p>
+<p class="image-container"><img style="width: 249.00px" src="img/bfcee94ef37a686.png"></p>
+<p>Click on the ‘+ Developer&#39; button on the upper right corner.</p>
+<p class="image-container"><img style="width: 140.00px" src="img/7d4df789bec32bb0.png"></p>
+<p>It will then present you a simple form to enter the developers data:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e767ab412ff873ce.png"></p>
+<p>Enter the details (choose any values) and click ‘Create&#39;. The button will be enabled once you fill in the details.</p>
+<p class="image-container"><img style="width: 205.00px" src="img/4b4702dd9cc78fcc.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create an Application" duration="5">
+        <p>The creation of an Application is very much similar to the one for a Developer or Product. In his case, we just need to enter basic information about the application being created and select which products will be used.</p>
+<p>In this lab, we&#39;ll be adding only the product that we just created.</p>
+<p>From the ‘Publish&#39; menu, select ‘Apps&#39;</p>
+<p class="image-container"><img style="width: 248.00px" src="img/e2d2ea3dabdbb8fa.png"></p>
+<p>Then, click on the ‘+ App&#39; on the upper right corner.</p>
+<p class="image-container"><img style="width: 130.00px" src="img/4ca3074828120551.png"></p>
+<p>This will bring you to the App Details screen.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/140cb64a1718956e.png"></p>
+<p>Enter the App name and select your developer. These are the only required details..</p>
+<p>Move down to the Credentials session. This is where we select the products, by clicking on the ‘Add product&#39; button.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9dca73dce7f89d65.png"></p>
+<p>Select your product and click on Add. This will bring you back and you should see it listed as Approved.</p>
+<p class="image-container"><img style="width: 548.00px" src="img/873fda301a893c7.png"></p>
+<p>Click on ‘Create&#39; at the top.</p>
+<p>Under credentials you should now be able to see the Key and Secret created for your app.</p>
+<p class="image-container"><img style="width: 376.00px" src="img/721f28c99652d1da.png"></p>
+<p>Click on ‘Show&#39; to see the data. </p>
+<p>Make sure you copy the Key string and use it in the next step to test the API.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test your API with the newly created API key" duration="5">
+        <p>Testing will be done the exact same way as before. Just make sure to use the correct API Key from your application and make sure you are still adding ‘/categories&#39; to the URL.</p>
+<p>Use the<a href="https://apigee-restclient.appspot.com/" target="_blank"> REST client tool</a>  to make the requests and pass the key in the apikey header.</p>
+<p>You should receive a 200 OK.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c77b112b851f5a19.png"></p>
+<p>If you test it with a trace session running, you should now be able to also inspect several variables that get populated as a result of successfully identifying the application invoking the API, by selecting the Verify API Key policy in the trace.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d97720717a19e020.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulations!" duration="0">
+        <p>You have created a product, developer, and app, and used the app credentials to successfully call your proxy.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>
