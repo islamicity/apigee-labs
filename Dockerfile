@@ -4,9 +4,16 @@ FROM nginx
 WORKDIR /app
 
 # copy the dist folder into the app folder
-COPY apigee* /app
-COPY bundle /app
-COPY index.html /app
+COPY ./apigee-labs.zip /app
+COPY ./bundles.zip /app
+COPY ./index.html /app
+
+# now unzip the files to a specified location
+RUN apt-get update
+RUN apt-get install unzip -y
+
+RUN unzip apigee-labs.zip -d app/
+RUN unzip bundles.zip -d app/
 
 # copy the nginx configuration file into the docker image
 COPY nginx.conf /etc/nginx/nginx.conf
