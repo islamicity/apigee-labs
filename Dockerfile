@@ -4,7 +4,7 @@ FROM nginx
 WORKDIR /app
 
 # copy the dist folder into the app folder
-COPY /apigee* /app
+COPY /apigee* /app/
 COPY /bundles /app/bundles
 
 # copy the nginx configuration file into the docker image
